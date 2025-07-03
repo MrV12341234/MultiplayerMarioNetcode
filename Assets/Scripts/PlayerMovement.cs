@@ -1,8 +1,9 @@
 using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using Unity.Netcode;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
     private new Camera camera;
     private new Rigidbody2D rigidbody;
@@ -50,6 +51,8 @@ private void OnDisable()
 
     private void Update()
     {
+        if (!IsOwner) return; // keeps movement inputs to the game, not the other players in the room
+        
         HorizontalMovement();
         // checks if you're grounded
         grounded = rigidbody.Raycast(Vector2.down);
@@ -57,15 +60,16 @@ private void OnDisable()
         {
             GroundedMovement();
         }
-
         ApplyGravity();
     }
 
     
     private void HorizontalMovement()
     {
+        if (!IsOwner) return;
+        
         inputAxis = Input.GetAxis("Horizontal");
-        velocity.x = Mathf.MoveTowards(velocity.x, inputAxis * moveSpeed, moveSpeed * friction * Time.deltaTime); // friction added to stop the long stop time
+        velocity.x = Mathf.MoveTowards(velocity.x, inputAxis * moveSpeed, moveSpeed * friction * Time.deltaTime); // player movement. friction added to stop the long transistion time between left and right
 
         if (rigidbody.Raycast(Vector2.right * velocity.x))
         {
@@ -84,6 +88,8 @@ private void OnDisable()
 
     private void GroundedMovement()
     {
+        if (!IsOwner) return;
+        
         velocity.y = Mathf.Max(velocity.y, 0f);
         jumping = velocity.y > 0f;
         if (Input.GetButtonDown("Jump"))
@@ -95,6 +101,7 @@ private void OnDisable()
 
     private void ApplyGravity()
     {
+        if (!IsOwner) return;
         //below physics allow the game to feel like the real mario where holding jump button gives you less gravity but when you release you start falling.
         bool falling = velocity.y < 0f || !Input.GetButton("Jump");
         float multiplier = falling ? 2f : 1f;
