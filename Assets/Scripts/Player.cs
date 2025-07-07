@@ -48,10 +48,13 @@ public class Player : NetworkBehaviour
         bigRenderer.enabled = false;
         deathAnimation.enabled = true;
         // TODO: add trivia activation here
+        Debug.Log("after death animation before Reset Level");
 
         if (IsOwner)
         {
-           GameManager.Instance.ResetLevel(3.2f);
+            Debug.Log("inside IsOwner before Reset Level");
+           GameManager.Instance.ResetLevel(2f);
+           Debug.Log("after ResetLevel");
            deathAnimation.enabled = false;
         }
         
