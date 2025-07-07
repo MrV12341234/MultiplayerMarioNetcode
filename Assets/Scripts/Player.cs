@@ -1,7 +1,8 @@
 using UnityEngine;
 using System.Collections;
+using Unity.Netcode;
 
-public class Player : MonoBehaviour
+public class Player : NetworkBehaviour
 {
     public PlayerSpriteRenderer smallRenderer;
     public PlayerSpriteRenderer bigRenderer;
@@ -9,6 +10,7 @@ public class Player : MonoBehaviour
     
     private DeathAnimation deathAnimation;
     private CapsuleCollider2D capsuleCollider;
+    private Rigidbody2D rb;  
 
     public bool big => bigRenderer.enabled;
     public bool small => smallRenderer.enabled;
@@ -19,6 +21,8 @@ public class Player : MonoBehaviour
     {
         deathAnimation = GetComponent<DeathAnimation>();
         capsuleCollider = GetComponent<CapsuleCollider2D>();
+        rb = GetComponent<Rigidbody2D>();
+        
         activeRenderer = smallRenderer;
     }
     
@@ -39,12 +43,40 @@ public class Player : MonoBehaviour
     
     public void Death()
     {
+        
         smallRenderer.enabled = false;
         bigRenderer.enabled = false;
         deathAnimation.enabled = true;
-        // add trivia activation here
+        // TODO: add trivia activation here
+
+        if (IsOwner)
+        {
+           GameManager.Instance.ResetLevel(3.2f);
+           deathAnimation.enabled = false;
+        }
         
-        GameManager.Instance.ResetLevel(3.2f);
+    }
+    
+    [ClientRpc]
+    public void DisablePlayerClientRpc()
+    {
+        // runs on **all** clients
+        GetComponent<PlayerMovement>().enabled = false;
+        GetComponent<CapsuleCollider2D>().enabled = false;
+        rb.simulated = false;   // stop physics
+        smallRenderer.enabled = bigRenderer.enabled = false;
+    }
+
+    [ClientRpc]
+    public void ResetStateClientRpc()
+    {
+        // enables movement, colliders, and the correct sprite
+        GetComponent<PlayerMovement>().enabled = true;
+        GetComponent<CapsuleCollider2D>().enabled = true;
+        rb.simulated = true;
+
+        smallRenderer.enabled = true;  // whatever your size logic is
+        bigRenderer.enabled   =  false;
     }
     
     public void Grow()
@@ -117,4 +149,6 @@ public class Player : MonoBehaviour
         activeRenderer.spriteRenderer.color = Color.white;
         starpower = false;
     }
+
+    
 }

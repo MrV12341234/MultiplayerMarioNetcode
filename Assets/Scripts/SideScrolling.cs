@@ -57,7 +57,8 @@ public class SideScrolling : MonoBehaviour
         Vector3 cameraPosition = transform.position;
 
         // Lock X so the camera never scrolls backwards. If you want player to move right and left, use this: cameraPosition.x = player.position.x;
-        cameraPosition.x = Mathf.Max(cameraPosition.x, player.position.x);
+        cameraPosition.x = player.position.x;
+        // cameraPosition.x = Mathf.Max(cameraPosition.x, player.position.x);
 
         transform.position = cameraPosition;
     }

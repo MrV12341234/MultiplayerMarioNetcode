@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.Netcode;
+using Unity.VisualScripting;
 
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkBehaviour
 {
   public static GameManager Instance { get; private set; }
   public int world { get; private set; }
@@ -39,17 +41,20 @@ public class GameManager : MonoBehaviour
   {
     lives = 3;
     coins = 0;
-
-    LoadLevel(1, 1);
+// add coding here to force player and camera to go back to very beginning
+    NetworkGameManager.Instance.NotifyDeathServerRpc(OwnerClientId); 
   }
 
-  public void LoadLevel(int world, int stage)
+  
+  /* no longer used once we went to netcode
+   public void LoadLevel(int world, int stage)
   {
     this.world = world;
     this.stage = stage;
     
    SceneManager.LoadScene($"{world}-{stage}"); 
   }
+  */
 
   public void NextLevel()
   {
@@ -69,11 +74,13 @@ public class GameManager : MonoBehaviour
 
   public void ResetLevel() // for when you die but have lives remaining
   {
+    
     lives--;
-
+    
     if (lives > 0)
     {
-      LoadLevel(world, stage);
+      // I need to add coding here to have the player go back to the most recent level, not the start of the game.
+      NetworkGameManager.Instance.NotifyDeathServerRpc(OwnerClientId); // tells the server you died – it will take care of the rest
     }
     else
     {
@@ -84,6 +91,8 @@ public class GameManager : MonoBehaviour
   private void GameOver() // when you lose all 3 lives it calls NewGame function (starts from 1-1). Here you could put scode for a game over scene or UI.
   {
     // SceneManager.LoadScene($"{world}-{stage}");   // this is if you want to start over on the current level
+   
+   
     NewGame();
     
   }
