@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using Unity.Netcode;
+using Unity.Collections;
 
 public class PlayerMovement : NetworkBehaviour
 {
@@ -25,7 +26,33 @@ public class PlayerMovement : NetworkBehaviour
     // below defines sliding. if your pressing button and your velocity is opposite, you are slide.
     public bool sliding => (inputAxis > 0f && velocity.x < 0f) || (inputAxis < 0f && velocity.x > 0f);
 
-private void Awake()
+private NetworkVariable<MyCustomData> randomNumber = new NetworkVariable<MyCustomData>(new MyCustomData()
+{
+    _int = 56,
+    _bool = true,
+}, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
+public struct MyCustomData : INetworkSerializable
+{
+    public int _int;
+    public bool _bool;
+    public FixedString128Bytes message;
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref _int);
+        serializer.SerializeValue(ref _bool);
+        serializer.SerializeValue(ref message);
+    }
+}
+
+public override void OnNetworkSpawn()
+{
+    randomNumber.OnValueChanged += (MyCustomData previousValue, MyCustomData newValue) =>
+    {
+        Debug.Log(OwnerClientId + "; " + newValue._int + "; " + newValue._bool + "; " + newValue.message);
+    };
+}
+    private void Awake()
     {
         rigidbody = GetComponent<Rigidbody2D>();
         collider = GetComponent<Collider2D>();
@@ -52,7 +79,17 @@ private void OnDisable()
     private void Update()
     {
         if (!IsOwner) return; // keeps movement inputs to the game, not the other players in the room
-        
+
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            randomNumber.Value = new MyCustomData
+            {
+                _int = 10,
+                _bool = false,
+                message = "All your base are belong"
+            };
+
+        }
         HorizontalMovement();
         // checks if you're grounded
         grounded = rigidbody.Raycast(Vector2.down);
