@@ -13,7 +13,7 @@ public class NetworkGameManager : NetworkBehaviour
 
     [Header("Level settings")]
     [SerializeField] private Transform spawnPoint;       // drag your level’s start pipe/ground here
-    [SerializeField] private float respawnDelay = 3f;
+    [SerializeField] private float respawnDelay = 0f;
 
     private NetworkVariable<int> lives = new NetworkVariable<int>(3);   // synced automatically
 

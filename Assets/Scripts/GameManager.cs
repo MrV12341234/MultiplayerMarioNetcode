@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Netcode;
@@ -10,6 +11,72 @@ public class GameManager : NetworkBehaviour
   public int stage { get; private set; }
   public int lives { get; private set; }
   public int coins { get; private set; }
+  
+  
+  public GameObject quiz;
+  public GameObject correctAnswer;
+  public GameObject wrongAnswer;
+  public bool showQuiz;
+  
+  [HideInInspector] public int correctAnswerCounter = 0;
+  
+  public void getCorrectAnswer()
+  {
+    correctAnswerCounter++;
+    if (correctAnswerCounter == 3)
+    {
+      quiz.SetActive(false);
+      ResetLevel();
+    } 
+    StartCoroutine(showCorrectAnswer());
+  }
+
+  public void getWrongAnswer()
+  {
+    StartCoroutine(showWrongAnswer());
+  }
+
+  public void ShowQuiz()
+  {
+    Debug.Log("got to ShowQuiz(), before if(showQuiz");
+    if (showQuiz) // check box inside GameManager inspector
+    {
+      Debug.Log("got to if (showQuiz), after if(showQuiz");
+      quiz.SetActive(true);
+      Debug.Log("got to quiz set acitve, ready to load first question");
+      Cursor.visible = true;
+      Cursor.lockState = CursorLockMode.None;
+      correctAnswerCounter = 0;
+      
+
+      // Initialize the first question
+      QuestionSetup setup = quiz.GetComponentInChildren<QuestionSetup>();
+      Debug.Log("went to QuestionSetup");
+      if (setup != null)
+      {
+        setup.InitializeNewQuestion();
+      }
+    }
+    else
+    {
+      ResetLevel();
+    }
+  }
+
+  IEnumerator showCorrectAnswer()
+  {
+    correctAnswer.SetActive(true);
+    yield return new WaitForSeconds(0.5f);
+    correctAnswer.SetActive(false);
+  }
+
+  IEnumerator showWrongAnswer()
+  {
+    wrongAnswer.SetActive(true);
+    yield return new WaitForSeconds(5f);
+    wrongAnswer.SetActive(false);
+  }
+  
   private void Awake()
   {
     if (Instance != null)
@@ -76,17 +143,17 @@ public class GameManager : NetworkBehaviour
 
   public void ResetLevel() // for when you die but have lives remaining
   {
-    Debug.Log("before lives -1");
+    
     lives--;
-    Debug.Log("after lives -1");
+    
     if (lives > 0)
     {
-      Debug.Log("before IsOwner inside ResetLevel()");
-      // I need to add coding here to have the player go back to the most recent level, not the start of the game.
-        Debug.Log("inside IsOwner before respawn");
+      
+      // I need to add coding here to have the player go back to the most recent level, not the start of the game. try using Y coordinate location
+        
         //TODO: client does not respawn
         NetworkGameManager.Instance.NotifyDeathServerRpc(); // tells the server you died – it will take care of the rest
-        Debug.Log("after respawn");
+        
       }
     else
     {

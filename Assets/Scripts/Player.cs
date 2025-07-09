@@ -7,8 +7,8 @@ public class Player : NetworkBehaviour
     public PlayerSpriteRenderer smallRenderer;
     public PlayerSpriteRenderer bigRenderer;
     private PlayerSpriteRenderer activeRenderer;
-    
-    private DeathAnimation deathAnimation;
+
+    public DeathAnimation deathAnimation;
     private CapsuleCollider2D capsuleCollider;
     private Rigidbody2D rb;  
 
@@ -43,20 +43,21 @@ public class Player : NetworkBehaviour
     
     public void Death()
     {
-        
         smallRenderer.enabled = false;
         bigRenderer.enabled = false;
         deathAnimation.enabled = true;
         // TODO: add trivia activation here
+        GameManager.Instance.ShowQuiz();
         Debug.Log("after death animation before Reset Level");
+        deathAnimation.enabled = false;
 
-        if (IsOwner)
+        /* if (IsOwner)
         {
             Debug.Log("inside IsOwner before Reset Level");
            GameManager.Instance.ResetLevel(2f);
            Debug.Log("after ResetLevel");
            deathAnimation.enabled = false;
-        }
+        } */
         
     }
     
