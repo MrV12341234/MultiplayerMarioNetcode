@@ -44,7 +44,7 @@ public class GameManager : NetworkBehaviour
 
     // NetworkSceneManager.LoadScene(0, LoadSceneMode.Single);
     if (IsOwner)
-    NetworkGameManager.Instance.NotifyDeathServerRpc(OwnerClientId); 
+    NetworkGameManager.Instance.NotifyDeathServerRpc(); 
   }
 
   
@@ -83,15 +83,11 @@ public class GameManager : NetworkBehaviour
     {
       Debug.Log("before IsOwner inside ResetLevel()");
       // I need to add coding here to have the player go back to the most recent level, not the start of the game.
-      if (IsOwner)
-      {
         Debug.Log("inside IsOwner before respawn");
         //TODO: client does not respawn
-        NetworkGameManager.Instance.NotifyDeathServerRpc(OwnerClientId); // tells the server you died – it will take care of the rest
+        NetworkGameManager.Instance.NotifyDeathServerRpc(); // tells the server you died – it will take care of the rest
         Debug.Log("after respawn");
       }
-      
-    }
     else
     {
       GameOver();

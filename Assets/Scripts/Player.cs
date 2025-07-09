@@ -152,6 +152,14 @@ public class Player : NetworkBehaviour
         activeRenderer.spriteRenderer.color = Color.white;
         starpower = false;
     }
+    
+    [ClientRpc]
+    public void TeleportOwnerClientRpc(Vector3 pos, ClientRpcParams rpc = default)
+    {
+        if (!IsOwner) return;                    // runs only on the targeted client
+        transform.SetPositionAndRotation(pos, Quaternion.identity);
+    }
+
 
     
 }
