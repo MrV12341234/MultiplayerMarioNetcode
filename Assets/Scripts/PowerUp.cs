@@ -8,6 +8,7 @@ public class PowerUp : MonoBehaviour
         ExtraLife,
         MagicMushroom,
         StarPower,
+        FirePower,
     }
     
     public Type type;
@@ -35,6 +36,9 @@ public class PowerUp : MonoBehaviour
                 break;
             case Type.StarPower:
                 player.GetComponent<Player>().Starpower();;
+                break;
+            case Type.FirePower:
+                player.GetComponent<Player>().Starpower();; //TODO: change this to Firepower(); once i update the function in Player.cs
                 break;
         }
         Destroy(gameObject);

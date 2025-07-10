@@ -3,7 +3,9 @@ using System.Collections;
 
 public class BlockHit : MonoBehaviour
 {
-    public GameObject item;
+    public GameObject item; // item spawned when mario is little
+    public GameObject bigItem;
+    
     public Sprite emptyBlock; // leave empty in inspector if you want block to become invisible after breaking
     public int maxHits = -1; // for how many times a block is able to be hit (-1 means it can be hit over & over w/out breaking b/c the Hit() function only destroys if 0)
     
@@ -12,16 +14,19 @@ public class BlockHit : MonoBehaviour
     //detect when mario collides with a block
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (!_animating && maxHits != 0 && collision.gameObject.CompareTag("Player")) // verifies what the object is
+        if (_animating || maxHits == 0) return;
+        if (!collision.gameObject.CompareTag("Player")) return;
+
+        // check Mario is hitting the bottom of the block
+        if (collision.transform.DotTest(transform, Vector2.up))
         {
-            // determine which direction mario is hitting the block (above side or below). Use dot test
-            if (collision.transform.DotTest(transform, Vector2.up)) // "collision.transform" is mario
-            {
-                Hit();
-            }
+            Player player = collision.gameObject.GetComponent<Player>();
+            GameObject prefab = (player != null && player.big) ? bigItem : item;
+
+            Hit(prefab);
         }
     }
-    private void Hit()
+    private void Hit(GameObject itemToSpawn)
     {
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.enabled = true; // revels block if its hidden
@@ -31,12 +36,11 @@ public class BlockHit : MonoBehaviour
         {
             spriteRenderer.sprite = emptyBlock;
         }
+        
 
-        if (item != null)
+        if (itemToSpawn != null)
         {
-            Debug.Log($"Spawning {item.name} at {transform.position}");
-            
-            Instantiate(item, transform.position, Quaternion.identity); //spawns an item if object is attached in inspector
+            Instantiate(itemToSpawn, transform.position, Quaternion.identity); //spawns an item if object is attached in inspector
         }
 
         StartCoroutine(Animate());

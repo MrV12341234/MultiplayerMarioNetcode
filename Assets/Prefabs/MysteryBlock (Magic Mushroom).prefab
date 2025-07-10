@@ -148,5 +148,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   item: {fileID: 5549022930187480305, guid: 736c4df9a852c74449ef06caeab80ac1, type: 3}
+  bigItem: {fileID: 7125708359974339561, guid: b1064d9ef5382c94aad51745944a350a, type: 3}
   emptyBlock: {fileID: 21300000, guid: 0ac141f921b554649bb187f85a24b184, type: 3}
   maxHits: 1

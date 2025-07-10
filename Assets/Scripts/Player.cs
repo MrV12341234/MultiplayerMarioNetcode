@@ -16,6 +16,7 @@ public class Player : NetworkBehaviour
     public bool small => smallRenderer.enabled;
     public bool dead => deathAnimation.enabled;
     public bool starpower { get; private set; }
+    public bool firepower { get; private set; }
 
     public void Awake()
     {
@@ -155,6 +156,14 @@ public class Player : NetworkBehaviour
         }
         activeRenderer.spriteRenderer.color = Color.white;
         starpower = false;
+    }
+
+    public void Firepower()
+    {
+        firepower = true;
+        // TODO: add coding to make player shoot fire. Called in PowerUp.cs
+        
+        firepower = false;
     }
     
     [ClientRpc]
