@@ -79,15 +79,12 @@ public class GameManager : NetworkBehaviour
   
   private void Awake()
   {
-    if (Instance != null)
+    if (Instance != null && Instance != this)
     {
-      DestroyImmediate(gameObject);
+      Destroy(gameObject);
+      return;
     }
-    else
-    {
-      Instance = this;
-      DontDestroyOnLoad(gameObject);
-    }
+    Instance = this;
   }
 
   private void OnDestroy()

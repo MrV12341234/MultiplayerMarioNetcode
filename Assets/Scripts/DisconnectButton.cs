@@ -19,6 +19,10 @@ public class DisconnectButton : MonoBehaviour
         {
              // 1. Shut down networking (works whether you are Host, Server-only, or Client)
                     NetworkManager.Singleton.Shutdown();
+                    Destroy(NetworkManager.Singleton.gameObject); // destorys NetworkManager so it doesnt reload
+                    
+                    var netGameMgr = NetworkGameManager.Instance;
+                    if (netGameMgr) Destroy(netGameMgr.gameObject);
         }
         SceneManager.LoadScene(0);
            
