@@ -16,7 +16,7 @@
 *.blend1
 *.blend1.meta
 
-# exclude things from trivia
+# exclude things from trivia (question scriptable objects end in .asset)
 *.jpg
 *.asset
 

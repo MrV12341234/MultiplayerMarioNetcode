@@ -110,20 +110,11 @@ public class GameManager : NetworkBehaviour
     coins = 0;
 
     // NetworkSceneManager.LoadScene(0, LoadSceneMode.Single);
-    if (IsOwner)
+    
     NetworkGameManager.Instance.NotifyDeathServerRpc(); 
   }
-
+ 
   
-  /* no longer used once we went to netcode
-   public void LoadLevel(int world, int stage)
-  {
-    this.world = world;
-    this.stage = stage;
-    
-   SceneManager.LoadScene($"{world}-{stage}"); 
-  }
-  */
 
   public void NextLevel()
   {
@@ -135,7 +126,7 @@ public class GameManager : NetworkBehaviour
    // LoadLevel(world, stage + 1); 
    
   }
-  // this fuction takes in a delay so right when mario dies ResetLevel() isnt ran instantly.
+  // this fuction takes in a delay so right when mario dies ResetLevel() isnt ran instantly. i stopped using a delay after trivia was introduced
   public void ResetLevel(float delay)
   {
     Invoke(nameof(ResetLevel), delay);
@@ -182,7 +173,7 @@ public class GameManager : NetworkBehaviour
 
   public void AddLife()
   {
-    lives++; // need to add ui for lives
+    lives++; 
   }
 
 }
