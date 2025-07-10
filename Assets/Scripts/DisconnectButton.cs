@@ -15,13 +15,12 @@ public class DisconnectButton : MonoBehaviour
 
     private void Disconnect()
     {
-        if (NetworkManager.Singleton == null) return;
-
-        // 1. Shut down networking (works whether you are Host, Server-only, or Client)
-        NetworkManager.Singleton.Shutdown();
-
-        // 2. Optionally return to your main-menu scene
-        // if (!string.IsNullOrEmpty(menuScene))
-           // SceneManager.LoadScene(menuScene);
+        if (NetworkManager.Singleton != null)
+        {
+             // 1. Shut down networking (works whether you are Host, Server-only, or Client)
+                    NetworkManager.Singleton.Shutdown();
+        }
+        SceneManager.LoadScene(0);
+           
     }
 }
