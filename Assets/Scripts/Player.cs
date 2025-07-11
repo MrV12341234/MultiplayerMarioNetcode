@@ -7,6 +7,7 @@ public class Player : NetworkBehaviour
     public PlayerSpriteRenderer smallRenderer;
     public PlayerSpriteRenderer bigRenderer;
     private PlayerSpriteRenderer activeRenderer;
+    public PlayerSpriteRenderer fireRenderer;
 
     public DeathAnimation deathAnimation;
     private CapsuleCollider2D capsuleCollider;
@@ -14,6 +15,7 @@ public class Player : NetworkBehaviour
 
     public bool big => bigRenderer.enabled;
     public bool small => smallRenderer.enabled;
+    public bool fire => fireRenderer.enabled;
     public bool dead => deathAnimation.enabled;
     public bool starpower { get; private set; }
     public bool firepower { get; private set; }
@@ -31,7 +33,7 @@ public class Player : NetworkBehaviour
     {
         if (!dead && !starpower)
         {
-            if (big)
+            if (big || firepower)
             {
                 Shrink();
             }
@@ -46,8 +48,11 @@ public class Player : NetworkBehaviour
     {
         smallRenderer.enabled = false;
         bigRenderer.enabled = false;
+        fireRenderer.enabled = false;
+        firepower = false;
         deathAnimation.enabled = true;
-        // TODO: add trivia activation here
+        
+        // add trivia activation here
         if (IsOwner)
         {
             GameManager.Instance.ShowQuiz();
@@ -103,6 +108,8 @@ public class Player : NetworkBehaviour
     {
         smallRenderer.enabled = true;
         bigRenderer.enabled = false;
+        fireRenderer.enabled = false;
+        firepower = false;
         activeRenderer = smallRenderer;
         // change capsule collider size when mario shrinks
         capsuleCollider.size = new Vector2(1f, 1f);
@@ -161,9 +168,18 @@ public class Player : NetworkBehaviour
     public void Firepower()
     {
         firepower = true;
-        // TODO: add coding to make player shoot fire. Called in PowerUp.cs
+        //  coding to make player shoot fire, Called in PowerUp.cs
+        // you must already be big to use a flower, so ensure collider is tall. Shouldnt be problem because flower only spawns if mario is big
+        if (!big) Grow();                          // small → big first
+
+        smallRenderer.enabled = false;
+        bigRenderer.enabled   = false;
+        fireRenderer.enabled  = true;
+        activeRenderer        = fireRenderer;
+
+        capsuleCollider.size   = new Vector2(1f, 2f);
+        capsuleCollider.offset = new Vector2(0f, 0.5f);
         
-        firepower = false;
     }
     
     [ClientRpc]

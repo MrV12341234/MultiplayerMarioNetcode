@@ -1,9 +1,10 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Serialization;
 
 public class BlockHit : MonoBehaviour
 {
-    public GameObject item; // item spawned when mario is little
+    public GameObject smallItem; // item spawned when mario is little
     public GameObject bigItem;
     
     public Sprite emptyBlock; // leave empty in inspector if you want block to become invisible after breaking
@@ -11,17 +12,17 @@ public class BlockHit : MonoBehaviour
     
     private bool _animating; // when block is hit there is an animation (eg mushroom comes out).We need to track if animation is playing so player cant hit many times at once
     
-    //detect when mario collides with a block
+    //detect when mario collides with a block and spawn 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (_animating || maxHits == 0) return;
         if (!collision.gameObject.CompareTag("Player")) return;
 
-        // check Mario is hitting the bottom of the block
+        // check Mario is hitting the bottom of the block. Also checks if mario is big or small
         if (collision.transform.DotTest(transform, Vector2.up))
         {
             Player player = collision.gameObject.GetComponent<Player>();
-            GameObject prefab = (player != null && player.big) ? bigItem : item;
+            GameObject prefab = (player != null && player.big) ? bigItem : smallItem;
 
             Hit(prefab);
         }

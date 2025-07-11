@@ -147,7 +147,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a6941a6ea597ef4895f2a23dc8498b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  item: {fileID: 5549022930187480305, guid: 736c4df9a852c74449ef06caeab80ac1, type: 3}
-  bigItem: {fileID: 7125708359974339561, guid: b1064d9ef5382c94aad51745944a350a, type: 3}
+  smallItem: {fileID: 5549022930187480305, guid: 736c4df9a852c74449ef06caeab80ac1, type: 3}
+  bigItem: {fileID: 2510003535372559817, guid: 856bfe4f9d3789b41933e2e5f9f1fbf7, type: 3}
   emptyBlock: {fileID: 21300000, guid: 0ac141f921b554649bb187f85a24b184, type: 3}
   maxHits: 1

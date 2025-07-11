@@ -147,5 +147,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a6941a6ea597ef4895f2a23dc8498b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  smallItem: {fileID: 0}
+  bigItem: {fileID: 0}
+  emptyBlock: {fileID: 0}
   maxHits: -1
-  emptyBlock: {fileID: 21300000, guid: 0ac141f921b554649bb187f85a24b184, type: 3}

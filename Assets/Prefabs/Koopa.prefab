@@ -230,6 +230,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 2
+  gravity: -0.15
   direction: {x: -1, y: 0}
 --- !u!114 &689025022915511522
 MonoBehaviour:

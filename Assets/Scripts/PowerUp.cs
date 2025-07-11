@@ -38,7 +38,7 @@ public class PowerUp : MonoBehaviour
                 player.GetComponent<Player>().Starpower();;
                 break;
             case Type.FirePower:
-                player.GetComponent<Player>().Starpower();; //TODO: change this to Firepower(); once i update the function in Player.cs
+                player.GetComponent<Player>().Firepower();; 
                 break;
         }
         Destroy(gameObject);
