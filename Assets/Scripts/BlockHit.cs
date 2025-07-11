@@ -22,7 +22,7 @@ public class BlockHit : MonoBehaviour
         if (collision.transform.DotTest(transform, Vector2.up))
         {
             Player player = collision.gameObject.GetComponent<Player>();
-            GameObject prefab = (player != null && player.big) ? bigItem : smallItem;
+            GameObject prefab = (player != null && (player.big || player.fire)) ? bigItem : smallItem; // checks if player is big or firepower, then spawns big item. otherwise small item
 
             Hit(prefab);
         }
