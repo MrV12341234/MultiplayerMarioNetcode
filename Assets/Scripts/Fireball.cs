@@ -10,8 +10,6 @@ public class Fireball : NetworkBehaviour
     [SerializeField] private LayerMask bounceMask;   // ground / pipes etc. (fireball will bounce off whatever item is checked in this)
 
     private Rigidbody2D rb;
-    
-    
 
     // Who fired the ball? (server-written -> everyone reads)
     private readonly NetworkVariable<ulong> ownerId =
@@ -34,14 +32,14 @@ public class Fireball : NetworkBehaviour
         if (IsServer)
         {
             // Server actually simulates physics.
-            rb.isKinematic = false;
+            rb.bodyType = RigidbodyType2D.Dynamic;
             rb.simulated   = true;
             Invoke(nameof(Despawn), lifeTime);
         }
         else
         {
             // Clients follow the NetworkTransform; no local physics.
-            rb.isKinematic = true;
+            rb.bodyType = RigidbodyType2D.Kinematic;
             rb.simulated   = false;
         }
     }
