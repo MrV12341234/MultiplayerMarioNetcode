@@ -59,8 +59,17 @@ public class Fireball : NetworkBehaviour
         // 1) LOCAL‐ONLY ENEMY HITS: run on every instance
         if (other.layer == LayerMask.NameToLayer("Enemy"))
         {
-            Destroy(other);
-            Despawn(); 
+            Destroy(other); // locally destroy enemy
+            if (IsServer)
+            {
+                // if we're the host, destroy fireball upon contact
+                Despawn();
+            }
+            else
+            {
+                // if we're a client, fire the RPC that requests host to destroy fireball
+                DespawnServerRpc();
+            }
             return;
         }
 
@@ -92,6 +101,14 @@ public class Fireball : NetworkBehaviour
     }
 
     private void Despawn()
+    {
+        if (NetworkObject.IsSpawned)
+            NetworkObject.Despawn();
+    }
+    
+    // below function required so client can request despawn of fireball
+    [ServerRpc(RequireOwnership = false)]
+    private void DespawnServerRpc(ServerRpcParams rpcParams = default)
     {
         if (NetworkObject.IsSpawned)
             NetworkObject.Despawn();

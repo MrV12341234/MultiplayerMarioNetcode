@@ -38,12 +38,11 @@ public class GameManager : NetworkBehaviour
 
   public void ShowQuiz()
   {
-    Debug.Log("got to ShowQuiz(), before if(showQuiz");
     if (showQuiz) // check box inside GameManager inspector
     {
-      Debug.Log("got to if (showQuiz), after if(showQuiz");
+      
       quiz.SetActive(true);
-      Debug.Log("got to quiz set acitve, ready to load first question");
+      
       Cursor.visible = true;
       Cursor.lockState = CursorLockMode.None;
       correctAnswerCounter = 0;
@@ -51,7 +50,7 @@ public class GameManager : NetworkBehaviour
 
       // Initialize the first question
       QuestionSetup setup = quiz.GetComponentInChildren<QuestionSetup>();
-      Debug.Log("went to QuestionSetup");
+      
       if (setup != null)
       {
         setup.InitializeNewQuestion();
@@ -112,17 +111,6 @@ public class GameManager : NetworkBehaviour
   }
  
   
-
-  public void NextLevel()
-  {
-    // if you build the entire game, add code here to check if it's the last stage for current world"
-    // if (world == 1 && stage == 10)
-   // {
-   //   LoadLevel(world + 1, 1);
-   // }
-   // LoadLevel(world, stage + 1); 
-   
-  }
   // this fuction takes in a delay so right when mario dies ResetLevel() isnt ran instantly. i stopped using a delay after trivia was introduced
   public void ResetLevel(float delay)
   {
@@ -137,12 +125,11 @@ public class GameManager : NetworkBehaviour
     if (lives > 0)
     {
       
-      // I need to add coding here to have the player go back to the most recent level, not the start of the game. try using Y coordinate location
-        
-        //TODO: client does not respawn
+      // TODO: I need to add coding here to have the player go back to the most recent level, not the start of the game. try using Y coordinate location
+      
         NetworkGameManager.Instance.NotifyDeathServerRpc(); // tells the server you died – it will take care of the rest
         
-      }
+    }
     else
     {
       GameOver();

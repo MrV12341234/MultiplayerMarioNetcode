@@ -52,6 +52,8 @@ public class Player : NetworkBehaviour
         bigRenderer.enabled = false;
         fireRenderer.enabled = false;
         firepower = false;
+        GetComponent<CapsuleCollider2D>().enabled = false;
+        GetComponent<Rigidbody2D>().simulated = false;
         deathAnimation.enabled = true;
         
         // add trivia activation here
@@ -92,6 +94,9 @@ public class Player : NetworkBehaviour
 
         smallRenderer.enabled = true;  // whatever your size logic is
         bigRenderer.enabled   =  false;
+        fireRenderer.enabled = false;
+        firepower = false;
+        deathAnimation.enabled = false;
     }
     
     public void Grow()
