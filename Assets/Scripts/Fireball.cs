@@ -1,7 +1,8 @@
 using UnityEngine;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 
-[RequireComponent(typeof(NetworkObject), typeof(Rigidbody2D))]
+
 public class Fireball : NetworkBehaviour
 {
     [SerializeField] private float speed     = 8f;
@@ -9,25 +10,40 @@ public class Fireball : NetworkBehaviour
     [SerializeField] private LayerMask bounceMask;   // ground / pipes etc. (fireball will bounce off whatever item is checked in this)
 
     private Rigidbody2D rb;
+    
+    
 
     // Who fired the ball? (server-written -> everyone reads)
-    private NetworkVariable<ulong> ownerClientId =
-        new NetworkVariable<ulong>(readPerm: NetworkVariableReadPermission.Everyone);
+    private readonly NetworkVariable<ulong> ownerId =
+        new(readPerm: NetworkVariableReadPermission.Everyone);
 
     private void Awake() => rb = GetComponent<Rigidbody2D>();
 
     // Called immediately after Instantiate and BEFORE Spawn()
     public void Init(bool facingRight, ulong shooterId)
     {
-        ownerClientId.Value = shooterId;
+        ownerId.Value = shooterId;
         rb.linearVelocity = new Vector2((facingRight ? 1 : -1) * speed, 0f);
-        transform.localScale = new Vector3(facingRight ? 1 : -1, 1, 1);
+        transform.rotation = facingRight ? Quaternion.identity
+            : Quaternion.Euler(0, 180, 0);
     }
 
     // Server schedules despawn
     public override void OnNetworkSpawn()
     {
-        if (IsServer) Invoke(nameof(Despawn), lifeTime);
+        if (IsServer)
+        {
+            // Server actually simulates physics.
+            rb.isKinematic = false;
+            rb.simulated   = true;
+            Invoke(nameof(Despawn), lifeTime);
+        }
+        else
+        {
+            // Clients follow the NetworkTransform; no local physics.
+            rb.isKinematic = true;
+            rb.simulated   = false;
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D col)
@@ -40,7 +56,7 @@ public class Fireball : NetworkBehaviour
         if (other.CompareTag("Player"))
         {
             var player = other.GetComponent<Player>();
-            if (player && player.OwnerClientId != ownerClientId.Value)   // ignore self-hits
+            if (player && player.OwnerClientId != ownerId.Value)   // ignore self-hits
             {
                 player.Hit();        
                 Despawn();

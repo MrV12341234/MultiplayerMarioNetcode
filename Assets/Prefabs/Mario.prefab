@@ -595,7 +595,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   fireballPrefab: {fileID: 5109601589954140841, guid: 8b7ba148da4b900468075e46158c9390, type: 3}
   spawnPoint: {fileID: 5739087800068185540}
-  fireRate: 0.33
+  fireRate: 0.75
 --- !u!114 &2866241967446564423
 MonoBehaviour:
   m_ObjectHideFlags: 0

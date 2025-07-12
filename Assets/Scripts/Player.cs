@@ -36,10 +36,12 @@ public class Player : NetworkBehaviour
             if (big || firepower)
             {
                 Shrink();
+                ShrinkClientRpc();
             }
             else
             {
                 Death();
+                DieClientRpc();
             } 
         }
     }
@@ -137,6 +139,20 @@ public class Player : NetworkBehaviour
         smallRenderer.enabled = false;
         bigRenderer.enabled = false;
         activeRenderer.enabled = true;
+    }
+    
+    [ClientRpc]
+    private void ShrinkClientRpc(ClientRpcParams rpc = default)
+    {
+        if (IsServer) return;           // already done locally
+        Shrink();                       // reuse the existing method
+    }
+
+    [ClientRpc]
+    private void DieClientRpc(ClientRpcParams rpc = default)
+    {
+        if (IsServer) return;           // already done locally
+        Death();                        // reuse the existing method
     }
 
     public void Starpower(float duration = 10f) // setting star power default to 10 sec

@@ -30,11 +30,11 @@ public class PlayerFire : NetworkBehaviour
     [ServerRpc]
     private void ShootServerRpc(Vector2 pos, bool facingRight, ServerRpcParams rpc = default)
     {
-        GameObject obj = Instantiate(fireballPrefab, pos, Quaternion.identity);
+        var obj = Instantiate(fireballPrefab, pos, Quaternion.identity);
+        var fb  = obj.GetComponent<Fireball>();
+        fb.Init(facingRight, rpc.Receive.SenderClientId);
 
-        // pass the shooter's ClientId to the fireball
-        obj.GetComponent<Fireball>().Init(facingRight, rpc.Receive.SenderClientId);
-
+        // Server is authority; no extra ownership needed:
         obj.GetComponent<NetworkObject>().Spawn();
     }
 }
