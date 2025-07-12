@@ -47,9 +47,9 @@ public class Fireball : NetworkBehaviour
             // Clients follow the NetworkTransform; no local physics.
             rb.bodyType = RigidbodyType2D.Kinematic;
             rb.useFullKinematicContacts = true;
-            rb.simulated   = false;
+            rb.simulated   = true;
             // disable transform-teleport; let NetworkRigidbody2D sync positions
-            if (netTrans != null) netTrans.enabled = false;
+            if (netTrans != null) netTrans.enabled = true;
         }
     }
 
