@@ -33,7 +33,9 @@ public class PlayerFire : NetworkBehaviour
         var obj = Instantiate(fireballPrefab, pos, Quaternion.identity);
         var netObj = obj.GetComponent<NetworkObject>();
         netObj.Spawn();
-        obj.GetComponent<Fireball>().Init(facingRight, rpc.Receive.SenderClientId);
+        
+        var fb = obj.GetComponent<Fireball>();
+        fb.Init(facingRight, rpc.Receive.SenderClientId);
             
 
     }

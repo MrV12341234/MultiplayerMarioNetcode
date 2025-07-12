@@ -12,15 +12,14 @@ public class Fireball : NetworkBehaviour
     private Rigidbody2D rb;
 
     // Who fired the ball? (server-written -> everyone reads)
-    private readonly NetworkVariable<ulong> ownerId =
-        new(readPerm: NetworkVariableReadPermission.Everyone);
+    private ulong ownerId;
 
     private void Awake() => rb = GetComponent<Rigidbody2D>();
 
     // Called immediately after Instantiate and BEFORE Spawn()
     public void Init(bool facingRight, ulong shooterId)
     {
-        ownerId.Value = shooterId;
+        ownerId = shooterId;
         rb.linearVelocity = new Vector2((facingRight ? 1 : -1) * speed, 0f);
         transform.rotation = facingRight ? Quaternion.identity
             : Quaternion.Euler(0, 180, 0);
@@ -52,7 +51,7 @@ public class Fireball : NetworkBehaviour
         if (other.CompareTag("Player"))
         {
             var player = other.GetComponent<Player>();
-            if (player && player.OwnerClientId != ownerId.Value)   // ignore self-hits
+            if (player && player.OwnerClientId != ownerId)   // ignore self-hits
             {
                 player.Hit();        
                 Despawn();
