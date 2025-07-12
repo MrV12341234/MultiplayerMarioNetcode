@@ -7,7 +7,7 @@ public class PlayerFire : NetworkBehaviour
     [Header("Fire-Mario settings")]
     [SerializeField] private GameObject fireballPrefab;
     [SerializeField] private Transform  spawnPoint;
-    [SerializeField] private float      fireRate = 0.33f;   // ≈ 3 per second
+    [SerializeField] private float      fireRate = 0.33f; // ≈3 per sec
 
     private Player player;
     private float  lastShot;
@@ -16,8 +16,7 @@ public class PlayerFire : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsOwner || !player.fire) return;          // only local Fire-Mario can shoot
-
+        if (!IsOwner || !player.fire) return;
         if (Input.GetButtonDown("Fire1") && Time.time - lastShot >= fireRate)
         {
             lastShot = Time.time;
@@ -26,17 +25,17 @@ public class PlayerFire : NetworkBehaviour
         }
     }
 
-    // Server spawns networked projectile
     [ServerRpc]
-    private void ShootServerRpc(Vector2 pos, bool facingRight, ServerRpcParams rpc = default)
+    private void ShootServerRpc(Vector2 pos, bool facingRight,
+        ServerRpcParams rpc = default)
     {
-        var obj = Instantiate(fireballPrefab, pos, Quaternion.identity);
-        var netObj = obj.GetComponent<NetworkObject>();
-        netObj.Spawn();
-        
+        // ① Instantiate & Spawn first
+        var obj   = Instantiate(fireballPrefab, pos, Quaternion.identity);
+        var netOb = obj.GetComponent<NetworkObject>();
+        netOb.Spawn();
+
+        // ② Now safe to call Init()
         var fb = obj.GetComponent<Fireball>();
         fb.Init(facingRight, rpc.Receive.SenderClientId);
-            
-
     }
 }
