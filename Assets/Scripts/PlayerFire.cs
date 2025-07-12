@@ -31,10 +31,10 @@ public class PlayerFire : NetworkBehaviour
     private void ShootServerRpc(Vector2 pos, bool facingRight, ServerRpcParams rpc = default)
     {
         var obj = Instantiate(fireballPrefab, pos, Quaternion.identity);
-        var fb  = obj.GetComponent<Fireball>();
-        fb.Init(facingRight, rpc.Receive.SenderClientId);
+        var netObj = obj.GetComponent<NetworkObject>();
+        netObj.Spawn();
+        obj.GetComponent<Fireball>().Init(facingRight, rpc.Receive.SenderClientId);
+            
 
-        // Server is authority; no extra ownership needed:
-        obj.GetComponent<NetworkObject>().Spawn();
     }
 }

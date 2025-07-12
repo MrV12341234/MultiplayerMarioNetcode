@@ -46,8 +46,6 @@ public class Fireball : NetworkBehaviour
 
     private void OnCollisionEnter2D(Collision2D col)
     {
-        if (!IsServer) return;                         // server-only authority
-
         GameObject other = col.gameObject;
 
         /* 1 ─ Hit another PLAYER ─────────────────────────────────── */
@@ -66,9 +64,10 @@ public class Fireball : NetworkBehaviour
         if (other.layer == LayerMask.NameToLayer("Enemy"))
         {
             Destroy(other);  // or enemy.Kill();
-            Despawn();
             return;
         }
+
+        if (!IsServer) return;
 
         /* 3 ─ Bounce off ground / walls / pipes ‐ optional ──────── */
         if (((1 << other.layer) & bounceMask) != 0)
