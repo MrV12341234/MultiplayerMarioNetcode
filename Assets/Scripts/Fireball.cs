@@ -13,8 +13,15 @@ public class Fireball : NetworkBehaviour
 
     // Who fired the ball? (server-written -> everyone reads)
     private ulong ownerId;
+    
+    private NetworkTransform netTrans;
 
-    private void Awake() => rb = GetComponent<Rigidbody2D>();
+    
+    private void Awake()
+    {
+        rb       = GetComponent<Rigidbody2D>();
+        netTrans = GetComponent<NetworkTransform>();
+    }
 
     // Called immediately after Instantiate and BEFORE Spawn()
     public void Init(bool facingRight, ulong shooterId)
@@ -39,7 +46,10 @@ public class Fireball : NetworkBehaviour
         {
             // Clients follow the NetworkTransform; no local physics.
             rb.bodyType = RigidbodyType2D.Kinematic;
+            rb.useFullKinematicContacts = true;
             rb.simulated   = false;
+            // disable transform-teleport; let NetworkRigidbody2D sync positions
+            if (netTrans != null) netTrans.enabled = false;
         }
     }
 
