@@ -26,12 +26,13 @@ public class PlayerFire : NetworkBehaviour
     }
 
     [ServerRpc]
-    private void ShootServerRpc(Vector2 pos, bool facingRight,
-        ServerRpcParams rpc = default)
+    private void ShootServerRpc(Vector2 pos, bool facingRight, ServerRpcParams rpc = default)
     {
+        Debug.Log($"[Server] ShootServerRpc(): pos={pos}, facingRight={facingRight}");
         // ① Instantiate & Spawn first
         var obj   = Instantiate(fireballPrefab, pos, Quaternion.identity);
         var netOb = obj.GetComponent<NetworkObject>();
+        
         netOb.Spawn();
 
         // ② Now safe to call Init()

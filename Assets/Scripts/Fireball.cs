@@ -25,12 +25,16 @@ public class Fireball : NetworkBehaviour
     /// </summary>
     public void Init(bool facingRight, ulong shooterId)
     {
+        Debug.Log($"[Server] Fireball.Init(): dir={(facingRight? 1:-1)} speed={speed}, spawnPos={transform.position}");
+        
         ownerId = shooterId;
         float dir = facingRight ? 1f : -1f;
         rb.linearVelocity = new Vector2(dir * speed, 0f);
         transform.rotation = facingRight
             ? Quaternion.identity
             : Quaternion.Euler(0, 180, 0);
+        Debug.Log($"Init(): facingRight={facingRight}, setting vel={(facingRight ? speed : -speed)}");
+
     }
 
     public override void OnNetworkSpawn()
@@ -53,7 +57,7 @@ public class Fireball : NetworkBehaviour
     }
 
     private void OnCollisionEnter2D(Collision2D col)
-    {
+    { 
         var other = col.gameObject;
 
         // 1) LOCAL‐ONLY ENEMY HITS: run on every instance
@@ -90,11 +94,13 @@ public class Fireball : NetworkBehaviour
         }
 
         // 4) BOUNCE SURFACES: only on server
-        if (((1 << other.layer) & bounceMask) != 0)
+         if (((1 << other.layer) & bounceMask) != 0)
         {
+            Debug.Log("before Bounced! vel=" + rb.linearVelocity);
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, 6f);
+            Debug.Log("after Bounced! vel=" + rb.linearVelocity);
             return;
-        }
+        } 
 
         // 5) ANYTHING ELSE: server despawns the projectile
         Despawn();
@@ -106,7 +112,7 @@ public class Fireball : NetworkBehaviour
             NetworkObject.Despawn();
     }
     
-    // below function required so client can request despawn of fireball
+    // below function required so client can request despawn of fireball after it hits enemy
     [ServerRpc(RequireOwnership = false)]
     private void DespawnServerRpc(ServerRpcParams rpcParams = default)
     {
