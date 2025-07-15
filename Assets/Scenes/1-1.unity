@@ -2929,6 +2929,8 @@ MonoBehaviour:
   correctAnswer: {fileID: 1012337249}
   wrongAnswer: {fileID: 1012337248}
   showQuiz: 0
+  levelHeight: 30
+  levelWidth: 200
   correctAnswerCounter: 0
 --- !u!4 &355057583
 Transform:
@@ -3780,7 +3782,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 27.2
+  orthographic size: 7
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -3805,7 +3807,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 48.2, y: 6.8, z: -10}
+  m_LocalPosition: {x: 12.5, y: 7, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []

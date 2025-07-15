@@ -33,7 +33,7 @@ public class PlayerFire : NetworkBehaviour
         var obj   = Instantiate(fireballPrefab, pos, Quaternion.identity);
         var netOb = obj.GetComponent<NetworkObject>();
         
-        netOb.Spawn();
+        netOb.SpawnWithOwnership(rpc.Receive.SenderClientId);
 
         // ② Now safe to call Init()
         var fb = obj.GetComponent<Fireball>();
