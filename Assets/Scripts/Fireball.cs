@@ -79,27 +79,26 @@ public class Fireball : NetworkBehaviour
         }
 
         // 2) PLAYER HITS: owner detects and asks server to apply damage
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && !IsOwner)
         {
             var player = other.GetComponent<Player>();
-            // avoid self hit
-            if (player && player.OwnerClientId != ownerId)
+            
+            if (IsServer)
             {
-                if (IsOwner)
-                {
-                    // Ask server to shrink/kill that player
-                    HitPlayerServerRpc(player.OwnerClientId);
-                    DespawnServerRpc();
-                }
-                else if (IsServer)
-                {
                     // (Optional fallback if server also collides)
                     player.Hit();
-                    Despawn();
-                }
+                    Despawn(); 
             }
+            else
+            {
+                    // kill other clients (Ask server to shrink/kill that player)
+                    HitPlayerServerRpc(player.OwnerClientId);
+                    DespawnServerRpc();
+            }
+            
             return;
         }
+        
 
         // 3) BOUNCE SURFACES: only on server
          if (((1 << other.layer) & bounceMask) != 0)
