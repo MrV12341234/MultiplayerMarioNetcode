@@ -32,14 +32,20 @@ public class PlayerFire : NetworkBehaviour
     {
         // 1) Instantiate the prefab
         var obj = Instantiate(fireballPrefab, pos, Quaternion.identity);
-        var fb  = obj.GetComponent<Fireball>();
+        var fb = obj.GetComponent<Fireball>();
+    
+        Vector3 direction = facingRight ? Vector3.right : Vector3.left;
+        Vector3 bufferOffset = direction * 0.5f;
+        obj.transform.position += bufferOffset;
 
-        // 2) Configure it *before* spawning so its NetworkVariables
-        //    are included in the initial spawn-message
-        fb.Configure(facingRight, rpc.Receive.SenderClientId);
+        // 2) Configure it with the shooter's ID
+        ulong shooterId = rpc.Receive.SenderClientId;
+        fb.Configure(facingRight, shooterId);
 
         // 3) Now spawn the object and give ownership to the shooter
-        obj.GetComponent<NetworkObject>()
-            .SpawnWithOwnership(rpc.Receive.SenderClientId);
+        var netObj = obj.GetComponent<NetworkObject>();
+        netObj.SpawnWithOwnership(shooterId);
+    
+        Debug.Log($"Fireball spawned. Owner: {shooterId}");
     }
 }

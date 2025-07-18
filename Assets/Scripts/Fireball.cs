@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using Unity.Netcode.Components;
+using Unity.VisualScripting;
 
 public class Fireball : NetworkBehaviour
 {
@@ -11,6 +12,11 @@ public class Fireball : NetworkBehaviour
     private Rigidbody2D      rb;
     private NetworkTransform netTrans;
     
+    private NetworkObject networkObject;
+    private bool hasBeenVisible;
+    private Renderer rend;
+    private bool isInitialized;
+    private bool selfKill; 
 
     // Synced direction (true = right, false = left)
     private readonly NetworkVariable<bool> netFacingRight =
@@ -26,7 +32,64 @@ public class Fireball : NetworkBehaviour
     {
         rb       = GetComponent<Rigidbody2D>();
         netTrans = GetComponent<NetworkTransform>();
+        networkObject = GetComponent<NetworkObject>();
+        rend = GetComponent<Renderer>();
         
+    }
+    
+    private void Start()
+    {
+        // Initialize self-kill timers
+        Invoke(nameof(Despawn), lifeTime); // Use existing Despawn method
+        selfKill = true;
+        Invoke(nameof(SelfKillOver), 0.1f); // Need to create this method
+    
+        // Handle physics for remote objects
+        if (!IsOwner)
+        {
+            rb.simulated = false;
+            GetComponent<Collider2D>().enabled = false;
+        }
+    
+        isInitialized = true;
+    }
+    
+    private void Update()
+    {
+        // Only process for remote fireballs not yet visible
+        if (!IsOwner && !hasBeenVisible)
+        {
+            // Check against all cameras (works in multiplayer)
+            if (rend.isVisible)
+            {
+                EnablePhysics();
+            }
+        }
+    }
+    
+    private void SelfKillOver()
+    {
+        selfKill = false;
+    }
+    
+    private bool IsVisibleFromCamera()
+    {
+        var renderer = GetComponent<Renderer>();
+        if (renderer == null) return false;
+        return renderer.isVisible;
+    }
+
+    private void EnablePhysics()
+    {
+        hasBeenVisible = true;
+        rb.simulated = true;
+        GetComponent<Collider2D>().enabled = true;
+    
+        // Critical: Sync with network position
+        if (networkObject != null)
+        {
+            transform.position = networkObject.transform.position;
+        }
     }
 
     /// Called by the server *before* the object is spawned.
@@ -80,6 +143,12 @@ public class Fireball : NetworkBehaviour
     // ---------- COLLISION & DESPAWN (unchanged) ----------
     private void OnCollisionEnter2D(Collision2D col)
     {
+        // initialization check
+        if (!isInitialized) return;
+    
+        // physics state check
+        if (!rb.simulated) return;
+        
         var other = col.gameObject;
 
         // 1) Enemy hits – local destroy + server despawn request
@@ -92,19 +161,34 @@ public class Fireball : NetworkBehaviour
         }
 
         // 2) Player hits – owner detects & tells server
-        if (other.CompareTag("Player") && !IsOwner)
+        if (other.CompareTag("Player"))
         {
             var player = other.GetComponent<Player>();
+            if (player == null) return;
+            
+            Debug.Log($"Fireball collision. Owner: {ownerId}, Target: {player.OwnerClientId}, IsServer: {IsServer}");
+            
+            // Prevent self-kill
+            if (player.OwnerClientId == ownerId) 
+            {
+                Debug.Log("Prevented self-kill");
+                return;
+            }
 
             if (IsServer)
             {
+                Debug.Log("Server applying hit directly");
                 player.Hit();
-                Despawn();
+                Debug.Log($"Fireball hit host player. Owner: {ownerId}, Target: {player.OwnerClientId}");
+                Despawn(); // despawn fireball shot by host player
             }
             else
             {
+                Debug.Log($"Client requesting hit on player {player.OwnerClientId}");
                 HitPlayerServerRpc(player.OwnerClientId);
-                DespawnServerRpc();
+                DespawnServerRpc(); // despawn fireball shot by client player
+                // player.Hit();
+                Debug.Log($"Fireball hit player. Owner: {ownerId}, Target: {player.OwnerClientId}");
             }
             return;
         }
@@ -124,9 +208,25 @@ public class Fireball : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void HitPlayerServerRpc(ulong targetClientId)
     {
-        foreach (var netObj in NetworkManager.Singleton.ConnectedClientsList)
-            if (netObj.ClientId == targetClientId)
-                netObj.PlayerObject.GetComponent<Player>()?.Hit();
+        Debug.Log($"Server received hit request for player {targetClientId}");
+    
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(targetClientId, out var client))
+        {
+            var player = client.PlayerObject.GetComponent<Player>();
+            if (player != null)
+            {
+                Debug.Log($"Server applying hit to player {targetClientId}");
+                player.Hit();
+            }
+            else
+            {
+                Debug.LogError($"Player object not found for client {targetClientId}");
+            }
+        }
+        else
+        {
+            Debug.LogError($"Client not found: {targetClientId}");
+        }
     }
 
     private void Despawn()

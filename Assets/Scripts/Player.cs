@@ -50,12 +50,15 @@ public class Player : NetworkBehaviour
     
     public void Hit() // if mario was hit by something
     {
+        Debug.Log("Got inside of Hit() but before if not dead or starpower");
         if (!dead && !starpower)
         {
             if (big || firepower)
             {
+                Debug.Log("Just before shrink");
                 Shrink();
                 ShrinkClientRpc();
+                Debug.Log("after shrink");
             }
             else
             {
@@ -168,15 +171,13 @@ public class Player : NetworkBehaviour
     [ClientRpc]
     private void ShrinkClientRpc(ClientRpcParams rpc = default)
     {
-        if (IsServer) return;           // already done locally
-        Shrink();                       // reuse the existing method
+        if (!IsServer) Shrink();                       
     }
 
     [ClientRpc]
     private void DieClientRpc(ClientRpcParams rpc = default)
     {
-        if (IsServer) return;           // already done locally
-        Death();                        // reuse the existing method
+        if (!IsServer) Death();                    
     }
 
     public void Starpower(float duration = 10f) // setting star power default to 10 sec
@@ -228,7 +229,4 @@ public class Player : NetworkBehaviour
         if (!IsOwner) return;                    // runs only on the targeted client
         transform.SetPositionAndRotation(pos, Quaternion.identity);
     }
-
-
-    
 }

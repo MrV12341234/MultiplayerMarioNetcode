@@ -6,7 +6,7 @@ using Unity.Netcode;               // For NetworkBehaviour.IsOwner
 /// Keeps the camera locked to the local player in a side-scrolling view.
 /// Works whether the player is already in the scene or spawns later via NGO.
 /// </summary>
-public class SideScrolling : MonoBehaviour
+public class SideScrolling : NetworkBehaviour
 {
     [Tooltip("Transform of the local player, filled automatically at runtime.")]
     public Transform player;
@@ -61,6 +61,8 @@ public class SideScrolling : MonoBehaviour
         // cameraPosition.x = Mathf.Max(cameraPosition.x, player.position.x);
 
         transform.position = cameraPosition;
+        
+        
     }
 
     /// <summary>Call this when Mario enters/exits an underground section.</summary>
