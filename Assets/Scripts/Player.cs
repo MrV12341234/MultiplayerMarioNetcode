@@ -12,6 +12,7 @@ public class Player : NetworkBehaviour
     public DeathAnimation deathAnimation;
     private CapsuleCollider2D capsuleCollider;
     private Rigidbody2D rb;  
+    private const int RemotePlayerLayer = 9; // used to put all players, other than the local player, on another layer so the enemys dont kill local player
 
     public bool big => bigRenderer.enabled;
     public bool small => smallRenderer.enabled;
@@ -28,6 +29,24 @@ public class Player : NetworkBehaviour
         
         activeRenderer = smallRenderer;
     }
+    
+    // used to put all players, other than the local player, on another layer so the enemys dont kill local player
+    private static void SetLayerRecursively(GameObject obj, int layer)
+    {
+        obj.layer = layer;
+        foreach (Transform t in obj.transform)
+            SetLayerRecursively(t.gameObject, layer);
+    }
+    
+    // used to put all players, other than the local player, on another layer so the enemys dont kill local player
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        if (!IsOwner)          // i.e. every “remote” copy
+            SetLayerRecursively(gameObject, RemotePlayerLayer);
+    }
+
     
     public void Hit() // if mario was hit by something
     {
