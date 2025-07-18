@@ -4,131 +4,129 @@ using Unity.Netcode.Components;
 
 public class Fireball : NetworkBehaviour
 {
-    [SerializeField] private float     speed     = 8f;
-    [SerializeField] private float     lifeTime  = 3f;
+    [SerializeField] private float  speed    = 8f;
+    [SerializeField] private float  lifeTime = 3f;
     [SerializeField] private LayerMask bounceMask;
 
-    private Rigidbody2D   rb;
+    private Rigidbody2D      rb;
     private NetworkTransform netTrans;
+    
 
-    // server-only: which client fired this
+    // Synced direction (true = right, false = left)
+    private readonly NetworkVariable<bool> netFacingRight =
+        new NetworkVariable<bool>(default,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Server);
+
+    // Which client fired the shot (server-side info only)
     private ulong ownerId;
 
+    // ---------- INITIALISATION ----------
     private void Awake()
     {
         rb       = GetComponent<Rigidbody2D>();
         netTrans = GetComponent<NetworkTransform>();
+        
     }
 
-    /// <summary>
-    /// Called immediately after Spawn().
-    /// </summary>
-    public void Init(bool facingRight, ulong shooterId)
+    /// Called by the server *before* the object is spawned.
+    public void Configure(bool facingRight, ulong shooterId)
     {
-        Debug.Log($"[Server] Fireball.Init(): dir={(facingRight? 1:-1)} speed={speed}, spawnPos={transform.position}");
         ownerId = shooterId;
+        netFacingRight.Value = facingRight;               // goes out in spawn message
+
         float dir = facingRight ? 1f : -1f;
         rb.linearVelocity = new Vector2(dir * speed, 0f);
-        transform.rotation = facingRight
-            ? Quaternion.identity
-            : Quaternion.Euler(0, 180, 0);
-        Debug.Log($"Init(): facingRight={facingRight}, setting vel={(facingRight ? speed : -speed)}");
 
+        // Flip visually via scale so we don’t rely on quaternion sync
+        transform.localScale = new Vector3(dir, 1f, 1f);
     }
 
     public override void OnNetworkSpawn()
     {
         bool ownerOrServer = IsServer || IsOwner;
+
         if (ownerOrServer)
         {
-            // server and the shooting client both run real physics
-            rb.bodyType   = RigidbodyType2D.Dynamic;
-            rb.simulated  = true;
+            rb.bodyType  = RigidbodyType2D.Dynamic;
+            rb.simulated = true;
+
+            // Owner-client (but not server) applies velocity again for safety
+            if (!IsServer && IsOwner)
+            {
+                ApplyVelocityFromNetVar();
+            }
+
             if (IsServer)
                 Invoke(nameof(Despawn), lifeTime);
         }
         else
         {
-            // non‐owners only replay via NetworkTransform
-            rb.bodyType                = RigidbodyType2D.Kinematic;
+            rb.bodyType                 = RigidbodyType2D.Kinematic;
             rb.useFullKinematicContacts = true;
-            rb.simulated               = true;
+            rb.simulated                = true;
             if (netTrans != null) netTrans.enabled = true;
         }
     }
 
+    // Helper so we only calculate this once
+    private void ApplyVelocityFromNetVar()
+    {
+        float dir = netFacingRight.Value ? 1f : -1f;
+        rb.linearVelocity = new Vector2(dir * speed, 0f);
+        transform.localScale = new Vector3(dir, 1f, 1f);
+    }
+
+    // ---------- COLLISION & DESPAWN (unchanged) ----------
     private void OnCollisionEnter2D(Collision2D col)
-    { 
+    {
         var other = col.gameObject;
 
-        // 1) LOCAL‐ONLY ENEMY HITS: run on every instance
+        // 1) Enemy hits – local destroy + server despawn request
         if (other.layer == LayerMask.NameToLayer("Enemy"))
         {
-            Destroy(other); // locally destroy enemy
+            Destroy(other);
+            if (IsServer) Despawn();
+            else          DespawnServerRpc();
+            return;
+        }
+
+        // 2) Player hits – owner detects & tells server
+        if (other.CompareTag("Player") && !IsOwner)
+        {
+            var player = other.GetComponent<Player>();
+
             if (IsServer)
             {
-                // if we're the host, destroy fireball upon contact
+                player.Hit();
                 Despawn();
             }
             else
             {
-                // if we're a client, fire the RPC that requests host to destroy fireball
+                HitPlayerServerRpc(player.OwnerClientId);
                 DespawnServerRpc();
             }
             return;
         }
 
-        // 2) PLAYER HITS: owner detects and asks server to apply damage
-        if (other.CompareTag("Player") && !IsOwner)
+        // 3) Bounce surfaces – handled only on server
+        if (((1 << other.layer) & bounceMask) != 0)
         {
-            var player = other.GetComponent<Player>();
-            
-            if (IsServer)
-            {
-                    // (Optional fallback if server also collides)
-                    player.Hit();
-                    Despawn(); 
-            }
-            else
-            {
-                    // kill other clients (Ask server to shrink/kill that player)
-                    HitPlayerServerRpc(player.OwnerClientId);
-                    DespawnServerRpc();
-            }
-            
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 6f);
             return;
         }
-        
 
-        // 3) BOUNCE SURFACES: only on server
-         if (((1 << other.layer) & bounceMask) != 0)
-        {
-            Debug.Log("before Bounced! vel=" + rb.linearVelocity);
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 6f);
-            Debug.Log("after Bounced! vel=" + rb.linearVelocity);
-            return;
-        } 
-
-        // 4) Anything else — owner asks server to despawn
-        if (IsOwner)
-            DespawnServerRpc();
-        else if (IsServer)
-            Despawn();
+        // 4) Everything else
+        if (IsOwner)  DespawnServerRpc();
+        else if (IsServer) Despawn();
     }
-    
+
     [ServerRpc(RequireOwnership = false)]
     private void HitPlayerServerRpc(ulong targetClientId)
     {
-        // Find that player's object and apply damage
         foreach (var netObj in NetworkManager.Singleton.ConnectedClientsList)
-        {
             if (netObj.ClientId == targetClientId)
-            {
-                var player = netObj.PlayerObject.GetComponent<Player>();
-                player?.Hit();
-                break;
-            }
-        }
+                netObj.PlayerObject.GetComponent<Player>()?.Hit();
     }
 
     private void Despawn()
@@ -136,8 +134,7 @@ public class Fireball : NetworkBehaviour
         if (NetworkObject.IsSpawned)
             NetworkObject.Despawn();
     }
-    
-    // below function required so client can request despawn of fireball after it hits enemy
+
     [ServerRpc(RequireOwnership = false)]
     private void DespawnServerRpc()
     {

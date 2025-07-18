@@ -7,7 +7,7 @@ public class PlayerFire : NetworkBehaviour
     [Header("Fire-Mario settings")]
     [SerializeField] private GameObject fireballPrefab;
     [SerializeField] private Transform  spawnPoint;
-    [SerializeField] private float      fireRate = 0.33f; // ≈3 per sec
+    [SerializeField] private float      fireRate = 0.33f; // 3 per sec
 
     private Player player;
     private float  lastShot;
@@ -17,6 +17,7 @@ public class PlayerFire : NetworkBehaviour
     private void Update()
     {
         if (!IsOwner || !player.fire) return;
+        
         if (Input.GetButtonDown("Fire1") && Time.time - lastShot >= fireRate)
         {
             lastShot = Time.time;
@@ -25,18 +26,20 @@ public class PlayerFire : NetworkBehaviour
         }
     }
 
+    
     [ServerRpc]
     private void ShootServerRpc(Vector2 pos, bool facingRight, ServerRpcParams rpc = default)
     {
-        Debug.Log($"[Server] ShootServerRpc(): pos={pos}, facingRight={facingRight}");
-        // ① Instantiate & Spawn first
-        var obj   = Instantiate(fireballPrefab, pos, Quaternion.identity);
-        var netOb = obj.GetComponent<NetworkObject>();
-        
-        netOb.SpawnWithOwnership(rpc.Receive.SenderClientId);
+        // 1) Instantiate the prefab
+        var obj = Instantiate(fireballPrefab, pos, Quaternion.identity);
+        var fb  = obj.GetComponent<Fireball>();
 
-        // ② Now safe to call Init()
-        var fb = obj.GetComponent<Fireball>();
-        fb.Init(facingRight, rpc.Receive.SenderClientId);
+        // 2) Configure it *before* spawning so its NetworkVariables
+        //    are included in the initial spawn-message
+        fb.Configure(facingRight, rpc.Receive.SenderClientId);
+
+        // 3) Now spawn the object and give ownership to the shooter
+        obj.GetComponent<NetworkObject>()
+            .SpawnWithOwnership(rpc.Receive.SenderClientId);
     }
 }
