@@ -1,97 +1,156 @@
 using Unity.Netcode;
 using UnityEngine;
 
-/// <summary>Synchronises Mario’s action & form for all clients.</summary>
 public class NetworkMarioAnimator : NetworkBehaviour
 {
-    public enum MarioForm : byte { Small, Big, Fire }
-    public enum MarioAction : byte { Idle, Run, Jump, Slide }
+    private Player player;
+    private PlayerMovement movement;
 
-    // Everyone can read, only the owner can write
-    private readonly NetworkVariable<MarioForm>  form   =
-        new(MarioForm.Small, NetworkVariableReadPermission.Everyone);
-
-    private readonly NetworkVariable<MarioAction> action =
-        new(MarioAction.Idle,  NetworkVariableReadPermission.Everyone);
-
-    /* --- References set in Inspector --- */
-    [Header("Child Renderers")]
-    [SerializeField] private GameObject smallGO;
-    [SerializeField] private GameObject bigGO;
-    [SerializeField] private GameObject fireGO;
-
-    private PlayerMovement move;
-    private Player        player;
-
-    /* ---------------- */
+    // Network variables for synchronization
+    private readonly NetworkVariable<int> currentForm = new NetworkVariable<int>(
+        0, 
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Owner
+    );
+    
+    private readonly NetworkVariable<bool> isRunning = new NetworkVariable<bool>(
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Owner
+    );
+    
+    private readonly NetworkVariable<bool> isJumping = new NetworkVariable<bool>(
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Owner
+    );
+    
+    private readonly NetworkVariable<bool> isSliding = new NetworkVariable<bool>(
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Owner
+    );
 
     private void Awake()
     {
-        move   = GetComponent<PlayerMovement>();
         player = GetComponent<Player>();
+        movement = GetComponent<PlayerMovement>();
     }
-    
 
     public override void OnNetworkSpawn()
     {
-        // Apply initial visuals
-        ApplyForm(form.Value);
-        ApplyAction(action.Value);
-
-        // React when a value changes on *any* client
-        form  .OnValueChanged += (_, n) => ApplyForm(n);
-        action.OnValueChanged += (_, n) => ApplyAction(n);
+        base.OnNetworkSpawn();
+        
+        // Only owner should update these variables
+        if (IsOwner)
+        {
+            // Initialize with current state
+            currentForm.Value = player.fire ? 2 : player.big ? 1 : 0;
+            isRunning.Value = movement.running;
+            isJumping.Value = movement.jumping;
+            isSliding.Value = movement.sliding;
+        }
+        
+        // All clients should apply initial state
+        ApplyFormState(currentForm.Value);
+        ApplyAnimationState();
+        
+        // Subscribe to changes
+        currentForm.OnValueChanged += OnFormChanged;
+        isRunning.OnValueChanged += OnRunningChanged;
+        isJumping.OnValueChanged += OnJumpingChanged;
+        isSliding.OnValueChanged += OnSlidingChanged;
     }
 
     private void Update()
     {
-        if (!IsOwner) return;            // Only the local player writes
-
-        // --- Decide current action ---
-        MarioAction a =
-            move.jumping ? MarioAction.Jump :
-            move.sliding ? MarioAction.Slide :
-            move.running ? MarioAction.Run  :
-                           MarioAction.Idle;
-
-        if (a != action.Value)   action.Value = a;
-
-        // --- Decide current form ---
-        MarioForm f =
-            player.firepower ? MarioForm.Fire :
-            player.big       ? MarioForm.Big  :
-                               MarioForm.Small;
-
-        if (f != form.Value)     form.Value = f;
+        // Only owner updates the network variables
+        if (!IsOwner) return;
+        
+        // Update form state
+        int formState = player.fire ? 2 : player.big ? 1 : 0;
+        if (currentForm.Value != formState)
+        {
+            currentForm.Value = formState;
+        }
+        
+        // Update animation states
+        if (isRunning.Value != movement.running)
+        {
+            isRunning.Value = movement.running;
+        }
+        if (isJumping.Value != movement.jumping)
+        {
+            isJumping.Value = movement.jumping;
+        }
+        if (isSliding.Value != movement.sliding)
+        {
+            isSliding.Value = movement.sliding;
+        }
     }
 
-    /* ===== Helpers to flip visuals when values arrive ===== */
-
-    private void ApplyForm(MarioForm f)
+    private void OnFormChanged(int previous, int current)
     {
-        smallGO.SetActive(f == MarioForm.Small);
-        bigGO  .SetActive(f == MarioForm.Big);
-        fireGO .SetActive(f == MarioForm.Fire);
+        ApplyFormState(current);
     }
 
-    private void ApplyAction(MarioAction a)
+    private void ApplyFormState(int form)
     {
-        // We can simply enable / disable the run AnimatedSprite
-        var rend = CurrentRenderer();
-        rend.run.enabled = (a == MarioAction.Run);
+        player.smallRenderer.enabled = (form == 0);
+        player.bigRenderer.enabled = (form == 1);
+        player.fireRenderer.enabled = (form == 2);
 
-        rend.spriteRenderer.sprite =
-            a switch {
-                MarioAction.Jump  => rend.jump,
-                MarioAction.Slide => rend.slide,
-                _                 => rend.idle
-            };
+        // Update active renderer reference
+        if (form == 2) player.activeRenderer = player.fireRenderer;
+        else if (form == 1) player.activeRenderer = player.bigRenderer;
+        else player.activeRenderer = player.smallRenderer;
+        
+        // Re-apply animation state after form change
+        ApplyAnimationState();
     }
 
-    private PlayerSpriteRenderer CurrentRenderer() =>
-        form.Value switch {
-            MarioForm.Big  => bigGO .GetComponent<PlayerSpriteRenderer>(),
-            MarioForm.Fire => fireGO.GetComponent<PlayerSpriteRenderer>(),
-            _              => smallGO.GetComponent<PlayerSpriteRenderer>(),
-        };
+    private void OnRunningChanged(bool previous, bool current)
+    {
+        ApplyAnimationState();
+    }
+
+    private void OnJumpingChanged(bool previous, bool current)
+    {
+        ApplyAnimationState();
+    }
+
+    private void OnSlidingChanged(bool previous, bool current)
+    {
+        ApplyAnimationState();
+    }
+
+    private void ApplyAnimationState()
+    {
+        if (player.activeRenderer == null) return;
+
+        // Apply the current animation state
+        player.activeRenderer.run.enabled = isRunning.Value;
+        
+        if (isJumping.Value)
+        {
+            player.activeRenderer.spriteRenderer.sprite = player.activeRenderer.jump;
+        }
+        else if (isSliding.Value)
+        {
+            player.activeRenderer.spriteRenderer.sprite = player.activeRenderer.slide;
+        }
+        else if (!isRunning.Value)
+        {
+            player.activeRenderer.spriteRenderer.sprite = player.activeRenderer.idle;
+        }
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+        currentForm.OnValueChanged -= OnFormChanged;
+        isRunning.OnValueChanged -= OnRunningChanged;
+        isJumping.OnValueChanged -= OnJumpingChanged;
+        isSliding.OnValueChanged -= OnSlidingChanged;
+    }
 }

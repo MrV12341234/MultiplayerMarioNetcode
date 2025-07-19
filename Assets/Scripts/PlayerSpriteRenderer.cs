@@ -26,10 +26,21 @@ public class PlayerSpriteRenderer : MonoBehaviour
     }
     private void LateUpdate()
     {
+        if (movement == null) return; // null check to prevent errors on non-owner players:
+    
         run.enabled = movement.running;
-        
-        if (movement.jumping)       { spriteRenderer.sprite = jump;  }
-        else if (movement.sliding)  { spriteRenderer.sprite = slide; }
-        else if (!movement.running) { spriteRenderer.sprite = idle;  }
+    
+        if (movement.jumping)
+        {
+            spriteRenderer.sprite = jump;
+        } 
+        else if (movement.sliding)
+        {
+            spriteRenderer.sprite = slide;
+        } 
+        else if (!movement.running)
+        {
+            spriteRenderer.sprite = idle;
+        }
     }
 }

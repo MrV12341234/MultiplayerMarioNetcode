@@ -6,7 +6,7 @@ public class Player : NetworkBehaviour
 {
     public PlayerSpriteRenderer smallRenderer;
     public PlayerSpriteRenderer bigRenderer;
-    private PlayerSpriteRenderer activeRenderer;
+    public PlayerSpriteRenderer activeRenderer { get; set; }
     public PlayerSpriteRenderer fireRenderer;
 
     public DeathAnimation deathAnimation;
@@ -45,6 +45,11 @@ public class Player : NetworkBehaviour
 
         if (!IsOwner)          // i.e. every “remote” copy
             SetLayerRecursively(gameObject, RemotePlayerLayer);
+        
+        if (!IsOwner)
+        {
+            GetComponent<PlayerMovement>().enabled = false;
+        }
     }
 
     
