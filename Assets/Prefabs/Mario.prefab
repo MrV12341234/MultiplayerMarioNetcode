@@ -418,6 +418,7 @@ GameObject:
   - component: {fileID: 1618794737108267399}
   - component: {fileID: 1909357566911375654}
   - component: {fileID: 2866241967446564423}
+  - component: {fileID: 4550421118315702021}
   m_Layer: 3
   m_Name: Mario
   m_TagString: Player
@@ -434,7 +435,7 @@ Transform:
   m_GameObject: {fileID: 8133420562228405546}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.5, y: 3, z: 0}
+  m_LocalPosition: {x: 3.5, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -505,7 +506,7 @@ CapsuleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.68, y: 1}
   m_Direction: 0
 --- !u!114 &3786950978456200369
 MonoBehaviour:
@@ -642,3 +643,19 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!114 &4550421118315702021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8133420562228405546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d33fcced547c98145bac3a6c63036448, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  smallGO: {fileID: 6717272142706522453}
+  bigGO: {fileID: 7270724430669806257}
+  fireGO: {fileID: 1645908165482544852}

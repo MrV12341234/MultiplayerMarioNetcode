@@ -127,7 +127,7 @@ public class Player : NetworkBehaviour
         bigRenderer.enabled = true;
         activeRenderer = bigRenderer;
         // change capsule collider size when mario grows
-        capsuleCollider.size = new Vector2(1f, 2f);
+        capsuleCollider.size = new Vector2(.68f, 2f); // .68 so he can fit through 1 block empty spaces
         capsuleCollider.offset = new Vector2(0f, 0.5f);
         
         StartCoroutine(ScaleAnimation());
@@ -141,7 +141,7 @@ public class Player : NetworkBehaviour
         firepower = false;
         activeRenderer = smallRenderer;
         // change capsule collider size when mario shrinks
-        capsuleCollider.size = new Vector2(1f, 1f);
+        capsuleCollider.size = new Vector2(.68f, 1f);
         capsuleCollider.offset = new Vector2(0f, 0f);
         StartCoroutine(ScaleAnimation());
     }

@@ -28,17 +28,8 @@ public class PlayerSpriteRenderer : MonoBehaviour
     {
         run.enabled = movement.running;
         
-        if (movement.jumping)
-        {
-            spriteRenderer.sprite = jump;
-        } 
-        else if (movement.sliding)
-        {
-            spriteRenderer.sprite = slide;
-        } 
-        else if (!movement.running)
-        {
-            spriteRenderer.sprite = idle;
-        }
+        if (movement.jumping)       { spriteRenderer.sprite = jump;  }
+        else if (movement.sliding)  { spriteRenderer.sprite = slide; }
+        else if (!movement.running) { spriteRenderer.sprite = idle;  }
     }
 }
