@@ -260,7 +260,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 2
-  gravity: -0.01
+  gravity: -0.001
   direction: {x: -1, y: 0}
   edgeCheckDistance: 1
   edgeCheckOffset: 1

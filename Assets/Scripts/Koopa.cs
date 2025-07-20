@@ -39,7 +39,7 @@ public class Koopa : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other) // box collider set to trigger
     {
         if (shelled && other.CompareTag("Player"))
         {

@@ -63,7 +63,7 @@ public class Player : NetworkBehaviour
                 Debug.Log("Just before shrink");
                 Shrink();
                 ShrinkClientRpc();
-                Debug.Log("after shrink");
+               
             }
             else
             {
