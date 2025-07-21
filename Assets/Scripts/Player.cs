@@ -55,12 +55,10 @@ public class Player : NetworkBehaviour
     
     public void Hit() // if mario was hit by something
     {
-        Debug.Log("Got inside of Hit() but before if not dead or starpower");
         if (!dead && !starpower)
         {
             if (big || firepower)
             {
-                Debug.Log("Just before shrink");
                 Shrink();
                 ShrinkClientRpc();
                

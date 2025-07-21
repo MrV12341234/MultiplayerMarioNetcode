@@ -33,7 +33,7 @@ public class UpDownHazard : MonoBehaviour
             spriteRenderer = GetComponent<SpriteRenderer>();
         
         if (spriteRenderer != null)
-            originalFlipState = spriteRenderer.flipY;
+            originalFlipState = spriteRenderer;
     }
 
     private void Start()
