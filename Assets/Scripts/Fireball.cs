@@ -140,7 +140,7 @@ public class Fireball : NetworkBehaviour
         transform.localScale = new Vector3(dir, 1f, 1f);
     }
 
-    // ---------- COLLISION & DESPAWN (unchanged) ----------
+    // ---------- COLLISION & DESPAWN ----------
     private void OnCollisionEnter2D(Collision2D col)
     {
         // initialization check
@@ -166,29 +166,25 @@ public class Fireball : NetworkBehaviour
             var player = other.GetComponent<Player>();
             if (player == null) return;
             
-            Debug.Log($"Fireball collision. Owner: {ownerId}, Target: {player.OwnerClientId}, IsServer: {IsServer}");
             
             // Prevent self-kill
             if (player.OwnerClientId == ownerId) 
             {
-                Debug.Log("Prevented self-kill");
+                
                 return;
             }
 
             if (IsServer)
             {
-                Debug.Log("Server applying hit directly");
+                
                 player.Hit();
-                Debug.Log($"Fireball hit host player. Owner: {ownerId}, Target: {player.OwnerClientId}");
                 Despawn(); // despawn fireball shot by host player
             }
             else
             {
-                Debug.Log($"Client requesting hit on player {player.OwnerClientId}");
                 HitPlayerServerRpc(player.OwnerClientId);
                 DespawnServerRpc(); // despawn fireball shot by client player
                 // player.Hit();
-                Debug.Log($"Fireball hit player. Owner: {ownerId}, Target: {player.OwnerClientId}");
             }
             return;
         }
@@ -208,14 +204,13 @@ public class Fireball : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void HitPlayerServerRpc(ulong targetClientId)
     {
-        Debug.Log($"Server received hit request for player {targetClientId}");
+        
     
         if (NetworkManager.Singleton.ConnectedClients.TryGetValue(targetClientId, out var client))
         {
             var player = client.PlayerObject.GetComponent<Player>();
             if (player != null)
             {
-                Debug.Log($"Server applying hit to player {targetClientId}");
                 player.Hit();
             }
             else
@@ -228,6 +223,7 @@ public class Fireball : NetworkBehaviour
             Debug.LogError($"Client not found: {targetClientId}");
         }
     }
+    
 
     private void Despawn()
     {
@@ -236,7 +232,7 @@ public class Fireball : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void DespawnServerRpc()
+    public void DespawnServerRpc() // also called in Bowser.cs to destroy fireball
     {
         if (NetworkObject != null && NetworkObject.IsSpawned)
             NetworkObject.Despawn();
