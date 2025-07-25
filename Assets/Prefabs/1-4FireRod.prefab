@@ -166,7 +166,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  spinSpeed: 180
+  spinSpeed: 140
   direction: 0
   pivotPoint: {fileID: 0}
   rodCollider: {fileID: 0}
