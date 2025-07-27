@@ -8,18 +8,18 @@ public class RedKoopaMovement : MonoBehaviour
     
     [Header("Edge Detection")]
     [SerializeField] private float edgeCheckDistance = 0.5f;
-    [SerializeField] private float edgeCheckOffset = 0.2f;
+    // [SerializeField] private float edgeCheckOffset = 0.2f;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float groundedRayDistance = 0.1f; // Specific distance for grounded check
     
     private Rigidbody2D rb;
     private Vector2 velocity;
-    private BoxCollider2D collider;
+    private BoxCollider2D _boxCollider;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        collider = GetComponent<BoxCollider2D>();
+        _boxCollider = GetComponent<BoxCollider2D>();
         enabled = false;
     }
     
@@ -127,7 +127,7 @@ public class RedKoopaMovement : MonoBehaviour
     {
         return new Vector2(
             rb.position.x,
-            rb.position.y - collider.bounds.extents.y
+            rb.position.y - _boxCollider.bounds.extents.y
         );
     }
 
@@ -135,8 +135,8 @@ public class RedKoopaMovement : MonoBehaviour
     private Vector2 GetFrontBottomPosition()
     {
         return new Vector2(
-            rb.position.x + (direction.x * collider.bounds.extents.x * 0.9f),
-            rb.position.y - collider.bounds.extents.y
+            rb.position.x + (direction.x * _boxCollider.bounds.extents.x * 0.9f),
+            rb.position.y - _boxCollider.bounds.extents.y
         );
     }
 }

@@ -1,19 +1,48 @@
 using System;
 using Unity.VisualScripting;
 using UnityEngine;
+using Unity.Netcode;
+using UnityEngine.Serialization;
 
-public class BridgeLever : MonoBehaviour
+public class BridgeLever : NetworkBehaviour
 {
 
-    public GameObject bridgePrefab;
+    [SerializeField] private GameObject bridgeInstance;   // bridge that resides next to lever
+
+    /* ---------- TRIGGER ---------- */
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Player player = other.GetComponent<Player>();
-        
-        if (player)
+        if (!other.CompareTag("Player")) return;
+
+        if (IsServer)
         {
-            Destroy(bridgePrefab);
-            Destroy(gameObject);
+            OnNetworkDespawn();          // host path.
         }
+        else
+        {
+            DespawnLeverAndBridgeServerRpc(); // client asks host through an RPC
+        }
+    }
+
+    /* ---------- RPC ---------- */
+    [ServerRpc(RequireOwnership = false)]
+    private void DespawnLeverAndBridgeServerRpc()
+    {
+        OnNetworkDespawn();;              // runs on the server
+    }
+
+    /* ---------- CORE LOGIC ---------- */
+    public override void OnNetworkDespawn() // "OnNetworkDespawn"()" is a netcode method that processes all the lines of code inside on all loaded players
+    {
+       GetComponent<SpriteRenderer>().enabled = false;   
+        GetComponent<Collider2D>().enabled     = false;
+
+        var sr = bridgeInstance.GetComponent<SpriteRenderer>();
+        var col = bridgeInstance.GetComponent<Collider2D>();
+        if (sr != null) sr.enabled = false;
+        if (col != null) col.enabled = false;
+        
+        Destroy(gameObject);
+        Destroy(bridgeInstance);
     }
 }

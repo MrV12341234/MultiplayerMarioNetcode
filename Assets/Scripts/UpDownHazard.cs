@@ -26,7 +26,9 @@ public class UpDownHazard : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        rb.isKinematic = true;
+        
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
         if (spriteRenderer == null)

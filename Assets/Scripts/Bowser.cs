@@ -27,6 +27,10 @@ public class Bowser : NetworkBehaviour
     private NetworkVariable<int> hitCount = new NetworkVariable<int>(0);
     private float groundCheckRadius = 0.2f;
 
+    private void Awake()
+    {
+        
+    }
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -85,12 +89,13 @@ public class Bowser : NetworkBehaviour
             Instantiate(flamePrefab, flameSpawnPoint.position, flameSpawnPoint.rotation);
         }
     }
+    
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.TryGetComponent(out Player player))
         {
-            if (IsServer) player.Hit();  // server deals damage once
+            player.Hit();  // server deals damage once
             return;
         }
 
