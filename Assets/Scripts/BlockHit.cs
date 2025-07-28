@@ -5,7 +5,7 @@ using UnityEngine.Serialization;
 public class BlockHit : MonoBehaviour
 {
     public GameObject smallItem; // item spawned when mario is little
-    public GameObject bigItem;
+    public GameObject bigItem; // item that is spawned if mario hits bottom and is big status
     
     public Sprite emptyBlock; // leave empty in inspector if you want block to become invisible after breaking
     public int maxHits = -1; // for how many times a block is able to be hit (-1 means it can be hit over & over w/out breaking b/c the Hit() function only destroys if 0)

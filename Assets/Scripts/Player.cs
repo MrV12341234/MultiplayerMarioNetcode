@@ -12,7 +12,7 @@ public class Player : NetworkBehaviour
     public DeathAnimation deathAnimation;
     private CapsuleCollider2D capsuleCollider;
     private Rigidbody2D rb;  
-    private const int RemotePlayerLayer = 9; // used to put all players, other than the local player, on another layer so the enemys dont kill local player
+    private const int RemotePlayerLayer = 9; // used to put all players, other than the local player, on another layer so the enemys don't kill local player
 
     public bool big => bigRenderer.enabled;
     public bool small => smallRenderer.enabled;
@@ -79,6 +79,8 @@ public class Player : NetworkBehaviour
         firepower = false;
         GetComponent<CapsuleCollider2D>().enabled = false;
         GetComponent<Rigidbody2D>().simulated = false;
+        capsuleCollider.size = new Vector2(.58f, 1f);
+        capsuleCollider.offset = new Vector2(0f, 0f);
         deathAnimation.enabled = true;
         
         // add trivia activation here
@@ -130,13 +132,13 @@ public class Player : NetworkBehaviour
         bigRenderer.enabled = true;
         activeRenderer = bigRenderer;
         // change capsule collider size when mario grows
-        capsuleCollider.size = new Vector2(.68f, 2f); // .68 so he can fit through 1 block empty spaces
+        capsuleCollider.size = new Vector2(.58f, 2f); // .58 so he can fit through 1 block empty spaces
         capsuleCollider.offset = new Vector2(0f, 0.5f);
         
         StartCoroutine(ScaleAnimation());
     }
 
-    private void Shrink()
+    public void Shrink()
     {
         smallRenderer.enabled = true;
         bigRenderer.enabled = false;
@@ -144,8 +146,26 @@ public class Player : NetworkBehaviour
         firepower = false;
         activeRenderer = smallRenderer;
         // change capsule collider size when mario shrinks
-        capsuleCollider.size = new Vector2(.68f, 1f);
+        capsuleCollider.size = new Vector2(.58f, 1f);
         capsuleCollider.offset = new Vector2(0f, 0f);
+        StartCoroutine(ScaleAnimation());
+    }
+    
+    public void Firepower()
+    {
+        firepower = true;
+        //  coding to make player shoot fire, Called in PowerUp.cs
+        // you must already be big to use a flower, so ensure collider is tall. Shouldnt be problem because flower only spawns if mario is big
+        if (!big) Grow();                          // small → big first
+
+        smallRenderer.enabled = false;
+        bigRenderer.enabled   = false;
+        fireRenderer.enabled  = true;
+        activeRenderer        = fireRenderer;
+
+        capsuleCollider.size   = new Vector2(.58f, 2f);
+        capsuleCollider.offset = new Vector2(0f, 0.5f);
+        
         StartCoroutine(ScaleAnimation());
     }
 
@@ -207,23 +227,6 @@ public class Player : NetworkBehaviour
         }
         activeRenderer.spriteRenderer.color = Color.white;
         starpower = false;
-    }
-
-    public void Firepower()
-    {
-        firepower = true;
-        //  coding to make player shoot fire, Called in PowerUp.cs
-        // you must already be big to use a flower, so ensure collider is tall. Shouldnt be problem because flower only spawns if mario is big
-        if (!big) Grow();                          // small → big first
-
-        smallRenderer.enabled = false;
-        bigRenderer.enabled   = false;
-        fireRenderer.enabled  = true;
-        activeRenderer        = fireRenderer;
-
-        capsuleCollider.size   = new Vector2(1f, 2f);
-        capsuleCollider.offset = new Vector2(0f, 0.5f);
-        
     }
     
     [ClientRpc]

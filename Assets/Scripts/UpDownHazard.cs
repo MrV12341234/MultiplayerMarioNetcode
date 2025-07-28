@@ -27,7 +27,7 @@ public class UpDownHazard : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         
-        rb.bodyType = RigidbodyType2D.Dynamic;
+        rb.bodyType = RigidbodyType2D.Kinematic;
         
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 

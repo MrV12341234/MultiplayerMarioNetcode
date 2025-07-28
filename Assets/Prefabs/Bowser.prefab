@@ -271,7 +271,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  jumpHeight: 1.2
+  jumpHeight: 1.5
   horizontalDistance: 1.5
   gravityScale: 1
   jumpInterval: 4

@@ -1,6 +1,7 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class DeathBarrier : MonoBehaviour
+public class DeathBarrier : NetworkBehaviour
 {
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -12,7 +13,10 @@ public class DeathBarrier : MonoBehaviour
             // GameManager.Instance.ResetLevel(3f);
         }
         else
-        {Destroy(other.gameObject); // any other game object gets destroyed if it touches the barrier
+        {
+            Destroy(other.gameObject); // any other game object gets destroyed if it touches the barrier
         }
     }
+
+    
 }
