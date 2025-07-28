@@ -229,6 +229,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   distanceUp: 1.5
   movementSpeed: 1
-  pauseAtTop: 1.2
+  pauseAtTop: 1.4
   invertSpriteAtTop: 0
   spriteRenderer: {fileID: 6670851908625109228}
