@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Princess : MonoBehaviour
@@ -12,7 +13,11 @@ public class Princess : MonoBehaviour
     // display quit button
     // force game quit after 15 
 
-
+    [Header("UI References")]
+    [SerializeField] private GameObject mainMenuCanvas;  
+    [SerializeField] private GameObject endGameCanvas;  
+    
+    [Header("Princess Motions")]
     [SerializeField] private float jumpForce = 10f;
     [SerializeField] private LayerMask groundLayer;          // what counts as ground
     [SerializeField] private float groundCheckDistance = 0.05f;
@@ -31,9 +36,21 @@ public class Princess : MonoBehaviour
             Jump();
     }
 
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (!other.collider.CompareTag("Player"))
+            return;
+        
+        mainMenuCanvas.SetActive(false);
+        endGameCanvas.SetActive(true);
+    }
+
     private void Jump()
     {
-        
+        // zero any downward velocity so small bumps don't cancel the jump
+        if (rb.linearVelocity.y < 0f) rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+
+        rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
     }
 
     private bool IsGrounded()

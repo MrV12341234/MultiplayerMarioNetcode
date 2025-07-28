@@ -8,6 +8,7 @@ public class BridgeLever : NetworkBehaviour
 {
 
     [SerializeField] private GameObject bridgeInstance;   // bridge that resides next to lever
+    public GameObject princessTextBubble;
 
     /* ---------- TRIGGER ---------- */
     private void OnTriggerEnter2D(Collider2D other)
@@ -44,5 +45,7 @@ public class BridgeLever : NetworkBehaviour
         
         Destroy(gameObject);
         Destroy(bridgeInstance);
+        
+        princessTextBubble.SetActive(true);
     }
 }
