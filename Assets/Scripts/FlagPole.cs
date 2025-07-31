@@ -33,14 +33,13 @@ public class FlagPole : MonoBehaviour
         yield return MoveTo(player, player.position + Vector3.right + Vector3.down);
         yield return MoveTo(player, castle.position);
         
+        GameManager.Instance.ShowQuiz(); // set trivia screen active at end of each level
+        
         //once player reaches the castle position he dissapears
         player.gameObject.SetActive(false);
 
         yield return new WaitForSeconds(2f);
         
-        //load next level. (from the original tutorial. I removed this and kept in the same scene)
-        // GameManager.Instance.LoadLevel(nextWorld, nextStage);
-
         NextLevel(player);
     }
 
@@ -73,7 +72,7 @@ public class FlagPole : MonoBehaviour
                 );
             }
             player.gameObject.SetActive(true);
-            player.GetComponent<PlayerMovement>().enabled = true;
+            // player.GetComponent<PlayerMovement>().enabled = true; // commented out so player stays inactive to answer the trivia questions. Movement set active again inside GameManager.cs getCorrectAnswer()
         }
         else
         {

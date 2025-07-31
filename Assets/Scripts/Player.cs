@@ -21,6 +21,8 @@ public class Player : NetworkBehaviour
     public bool starpower { get; private set; }
     public bool firepower { get; private set; }
 
+    public bool isDead { get; private set; }
+
     public void Awake()
     {
         deathAnimation = GetComponent<DeathAnimation>();
@@ -49,6 +51,10 @@ public class Player : NetworkBehaviour
         if (!IsOwner)
         {
             GetComponent<PlayerMovement>().enabled = false;
+        }else                      // this is the local player
+        {
+            // Tell GameManager.cs which PlayerMovement belongs to us
+            GameManager.Instance.RegisterLocalMover(GetComponent<PlayerMovement>());
         }
     }
 
@@ -86,6 +92,9 @@ public class Player : NetworkBehaviour
         // add trivia activation here
         if (IsOwner)
         {
+            isDead = true; // used in GameManager.cs getCorrectAnswer() to determine if level should be reset or player continues to play
+            GameManager.Instance.OnLocalPlayerDied();
+            
             GameManager.Instance.ShowQuiz();
            
             deathAnimation.enabled = false;
@@ -109,12 +118,15 @@ public class Player : NetworkBehaviour
         GetComponent<PlayerMovement>().enabled = true;
         GetComponent<CapsuleCollider2D>().enabled = true;
         rb.simulated = true;
-
-        smallRenderer.enabled = true;  // whatever your size logic is
+        
+        isDead = false;         
+        GameManager.Instance.OnLocalPlayerRespawned();
+        
         bigRenderer.enabled   =  false;
         fireRenderer.enabled = false;
         firepower = false;
         deathAnimation.enabled = false;
+        smallRenderer.enabled = true;  // whatever your size logic is
     }
     
     public void Grow()

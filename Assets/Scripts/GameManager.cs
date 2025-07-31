@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Netcode;
 using Unity.VisualScripting;
+using UnityEngine.Serialization;
 
 public class GameManager : NetworkBehaviour
 {
@@ -11,7 +12,8 @@ public class GameManager : NetworkBehaviour
   public int stage { get; private set; }
   public int lives { get; private set; }
   public int coins { get; private set; }
-  [SerializeField] private PlayerMovement playerPrefab; // used in GameOver() to stop playermovement
+  
+  private PlayerMovement _localMover;
   [SerializeField] private GameObject mainMenuUI;
   [SerializeField] private GameObject gameOverUI;
   
@@ -19,16 +21,49 @@ public class GameManager : NetworkBehaviour
   public GameObject correctAnswer;
   public GameObject wrongAnswer;
   public bool showQuiz;
+  private bool _localPlayerDied; 
+  private PlayerMovement _lockedMovement;
+  
   
   [HideInInspector] public int correctAnswerCounter = 0;
+  public void OnLocalPlayerDied()       { _localPlayerDied = true; } // called in Player.cs to help determine if player is answer trivia b/c dead or b/c collided with object that set triviaUI active
+  public void OnLocalPlayerRespawned()  { _localPlayerDied = false; }
+  public void RegisterLocalMover(PlayerMovement mover)
+  {
+    _localMover = mover;
+  }
+  private void LockMovement()   { if (_localMover) _localMover.enabled = false; }
+  private void UnlockMovement() { if (_localMover) _localMover.enabled = true;  }
+  
+  private void Awake()
+  {
+    if (Instance != null && Instance != this)
+    {
+      Destroy(gameObject);
+      return;
+    }
+    Instance = this;
+  }
+  
+  private void Start()
+  {
+    Application.targetFrameRate = 60;
+    UnlockMovement(); 
+    NewGame();
+  }
   
   public void getCorrectAnswer() // called from AnswerButton.cs after correct answer pressed
   {
     correctAnswerCounter++;
-    if (correctAnswerCounter == 3)
+    if (correctAnswerCounter == 3 && _localPlayerDied) // used to check if player is answering questions because they died
     {
       quiz.SetActive(false);
       ResetLevel();
+    } 
+    if (correctAnswerCounter == 3) // used to check if player is answering questions when not dead (trivia forced by collision/trigger of object)
+    {
+      quiz.SetActive(false);
+      UnlockMovement();
     } 
     StartCoroutine(showCorrectAnswer());
   }
@@ -42,7 +77,7 @@ public class GameManager : NetworkBehaviour
   {
     if (showQuiz) // check box inside GameManager inspector
     {
-      
+      LockMovement();
       quiz.SetActive(true);
       
       Cursor.visible = true;
@@ -60,6 +95,7 @@ public class GameManager : NetworkBehaviour
     }
     else
     {
+      // TODO: add check for isDead before resetting level. if showQuiz is not checked, ShowQuiz() is called from TriviaActivator on some objects
       ResetLevel();
     }
   }
@@ -77,16 +113,6 @@ public class GameManager : NetworkBehaviour
     yield return new WaitForSeconds(5f);
     wrongAnswer.SetActive(false);
   }
-  
-  private void Awake()
-  {
-    if (Instance != null && Instance != this)
-    {
-      Destroy(gameObject);
-      return;
-    }
-    Instance = this;
-  }
 
   private void OnDestroy()
   {
@@ -94,12 +120,6 @@ public class GameManager : NetworkBehaviour
     {
       Instance = null;
     }
-  }
-  private void Start()
-  {
-    Application.targetFrameRate = 60;
-    playerPrefab.enabled = true; // 
-    NewGame();
   }
 
   private void NewGame()
@@ -140,13 +160,13 @@ public class GameManager : NetworkBehaviour
 
   private void GameOver() // when you lose all 3 lives it calls NewGame function (starts from 1-1). Here you could put scode for a game over scene or UI.
   {
-    if (IsServer) // we do not want the host disconnecting from the game, so they just respawn
+    if (IsServer) // do not want the host disconnecting from the game, so they just respawn
     {
       NewGame();
     }
     else
-    { 
-      playerPrefab.enabled = false;
+    {
+      LockMovement(); // this function is at the top of this class. Player.cs feeds it
       mainMenuUI.SetActive(false);
       gameOverUI.SetActive(true);
     }
