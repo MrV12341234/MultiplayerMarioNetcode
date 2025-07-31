@@ -58,11 +58,13 @@ public class GameManager : NetworkBehaviour
     if (correctAnswerCounter == 3 && _localPlayerDied) // used to check if player is answering questions because they died
     {
       quiz.SetActive(false);
+      Debug.Log("inside getCorrectAnswer, correctAnswerCounter==3 && _localPlayerDied, after set quiz active");
       ResetLevel();
     } 
-    if (correctAnswerCounter == 3) // used to check if player is answering questions when not dead (trivia forced by collision/trigger of object)
+    else if (correctAnswerCounter == 3) // used to check if player is answering questions when not dead (trivia forced by collision/trigger of object)
     {
       quiz.SetActive(false);
+      Debug.Log("inside getCorrectAnswer, correctAnswerCounter==3, after set quiz active");
       UnlockMovement();
     } 
     StartCoroutine(showCorrectAnswer());
