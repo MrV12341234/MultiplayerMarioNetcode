@@ -86,7 +86,6 @@ public class QuestionSetup : MonoBehaviour
 
     public void SetAnswerValues()
     {
-        Debug.Log("[Trivia] SetAnswerValues ran inside QuestionSetup");
         List<string> answers = RandomizeAnswers(new List<string>(currentQuestion.answers));
 
         for (int i = 0; i < answerButtons.Length; i++)

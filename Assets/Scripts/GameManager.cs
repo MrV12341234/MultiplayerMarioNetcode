@@ -11,7 +11,9 @@ public class GameManager : NetworkBehaviour
   public int stage { get; private set; }
   public int lives { get; private set; }
   public int coins { get; private set; }
-  
+  [SerializeField] private PlayerMovement playerPrefab; // used in GameOver() to stop playermovement
+  [SerializeField] private GameObject mainMenuUI;
+  [SerializeField] private GameObject gameOverUI;
   
   public GameObject quiz;
   public GameObject correctAnswer;
@@ -20,7 +22,7 @@ public class GameManager : NetworkBehaviour
   
   [HideInInspector] public int correctAnswerCounter = 0;
   
-  public void getCorrectAnswer()
+  public void getCorrectAnswer() // called from AnswerButton.cs after correct answer pressed
   {
     correctAnswerCounter++;
     if (correctAnswerCounter == 3)
@@ -96,7 +98,7 @@ public class GameManager : NetworkBehaviour
   private void Start()
   {
     Application.targetFrameRate = 60;
-    
+    playerPrefab.enabled = true; // 
     NewGame();
   }
 
@@ -125,7 +127,7 @@ public class GameManager : NetworkBehaviour
     if (lives > 0)
     {
       
-      // TODO: I need to add coding here to have the player go back to the most recent level, not the start of the game. try using Y coordinate location
+      // TODO: I need to add coding here to have the player go back to checkpoint, not the start of the game. try using Y coordinate location
       
         NetworkGameManager.Instance.NotifyDeathServerRpc(); // tells the server you died – it will take care of the rest
         
@@ -138,11 +140,16 @@ public class GameManager : NetworkBehaviour
 
   private void GameOver() // when you lose all 3 lives it calls NewGame function (starts from 1-1). Here you could put scode for a game over scene or UI.
   {
-    // SceneManager.LoadScene($"{world}-{stage}");   // this is if you want to start over on the current level
-   
-   
-    NewGame();
-    
+    if (IsServer) // we do not want the host disconnecting from the game, so they just respawn
+    {
+      NewGame();
+    }
+    else
+    { 
+      playerPrefab.enabled = false;
+      mainMenuUI.SetActive(false);
+      gameOverUI.SetActive(true);
+    }
   }
 
   public void AddCoin()

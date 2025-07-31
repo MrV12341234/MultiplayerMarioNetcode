@@ -90,15 +90,6 @@ public class Player : NetworkBehaviour
            
             deathAnimation.enabled = false;
         }
-        
-        /* if (IsOwner)
-        {
-            Debug.Log("inside IsOwner before Reset Level");
-           GameManager.Instance.ResetLevel(2f);
-           Debug.Log("after ResetLevel");
-           deathAnimation.enabled = false;
-        } */
-        
     }
     
     [ClientRpc]
