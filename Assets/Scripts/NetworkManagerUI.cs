@@ -13,6 +13,7 @@ public class NetworkManagerUI : MonoBehaviour
 
     [Header("Join-by-IP UI")]
     [SerializeField] private TMP_InputField ipInputField;      // drag the InputField here
+    [SerializeField] private TMP_InputField gamertagInput;
     [SerializeField] private TextMeshProUGUI feedbackText;     // optional – drag a Text label here
     [SerializeField] private ushort port = 7777;               // default UTP port
 
@@ -45,10 +46,28 @@ public class NetworkManagerUI : MonoBehaviour
     #region Button handlers
     private void StartServer() => NetworkManager.Singleton.StartServer();
 
-    private void StartHost()   => NetworkManager.Singleton.StartHost();
+    private void StartHost()
+    {
+        if (!ValidateGamertag()) return;
+
+        // Save locally – also handy when you return to menu after a match
+        PlayerPrefs.SetString("Gamertag", gamertagInput.text.Trim());
+
+        // Pass the name to the server through ConnectionData
+        NetworkManager.Singleton.NetworkConfig.ConnectionData =
+            System.Text.Encoding.UTF8.GetBytes(gamertagInput.text.Trim());
+        
+        NetworkManager.Singleton.StartHost(); 
+    } 
 
     private void StartClient()
     {
+        if (!ValidateGamertag()) return;
+        
+        PlayerPrefs.SetString("Gamertag", gamertagInput.text.Trim());
+        NetworkManager.Singleton.NetworkConfig.ConnectionData =
+            System.Text.Encoding.UTF8.GetBytes(gamertagInput.text.Trim());
+                
         var ip = ipInputField.text.Trim();
 
         if (string.IsNullOrEmpty(ip))
@@ -67,6 +86,9 @@ public class NetworkManagerUI : MonoBehaviour
 
         ShowFeedback($"<color=#00ff00>Connecting to {ip}:{port} …"); // <color=#00ff00> is green
         isAttemptingConnection = true;
+        
+        
+        
         NetworkManager.Singleton.StartClient();
     }
     #endregion
@@ -93,5 +115,17 @@ public class NetworkManagerUI : MonoBehaviour
     {
         if (feedbackText) feedbackText.text = message;
         else              Debug.Log(message);
+    }
+
+    private bool ValidateGamertag()
+    {
+        if (string.IsNullOrWhiteSpace(gamertagInput.text))
+        {
+            feedbackText.text = "<color=#ff0000>Please enter a name";
+            return false;
+        }
+
+        feedbackText.text = string.Empty;
+        return true;
     }
 }

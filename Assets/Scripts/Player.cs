@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Unity.Collections;
 using Unity.Netcode;
 
 public class Player : NetworkBehaviour
@@ -13,6 +14,9 @@ public class Player : NetworkBehaviour
     private CapsuleCollider2D capsuleCollider;
     private Rigidbody2D rb;  
     private const int RemotePlayerLayer = 9; // used to put all players, other than the local player, on another layer so the enemys don't kill local player
+    public NetworkVariable<FixedString32Bytes> PlayerName =
+        new NetworkVariable<FixedString32Bytes>(
+            writePerm: NetworkVariableWritePermission.Server);
 
     public bool big => bigRenderer.enabled;
     public bool small => smallRenderer.enabled;
@@ -56,6 +60,29 @@ public class Player : NetworkBehaviour
             // Tell GameManager.cs which PlayerMovement belongs to us
             GameManager.Instance.RegisterLocalMover(GetComponent<PlayerMovement>());
         }
+        // When the owner spawns they tell the server their name
+        if (IsOwner && IsClient)
+        {
+            var localName =
+                PlayerPrefs.GetString("Gamertag", "Player").Trim(); 
+            if (localName.Length == 0) localName = "Player";
+            SubmitNameServerRpc(localName);
+        }
+
+        // Hook the change event so everyone updates the visible tag
+        PlayerName.OnValueChanged += OnNameChanged;
+    }
+    
+    [ServerRpc]
+    private void SubmitNameServerRpc(string newName, ServerRpcParams rpc = default)
+    {
+        PlayerName.Value = newName;
+    }
+
+    private void OnNameChanged(FixedString32Bytes _, FixedString32Bytes newName)
+    {
+        // Forward to the NameTagUI if it exists
+        GetComponentInChildren<NameTagUI>()?.Refresh(newName.ToString());
     }
 
     
@@ -119,8 +146,11 @@ public class Player : NetworkBehaviour
         GetComponent<CapsuleCollider2D>().enabled = true;
         rb.simulated = true;
         
-        isDead = false;         
-        GameManager.Instance.OnLocalPlayerRespawned();
+        isDead = false;
+        if (IsOwner) // only want the 'localplayer respawned set on the owner, not everyone
+        {
+           GameManager.Instance.OnLocalPlayerRespawned(); 
+        }
         
         bigRenderer.enabled   =  false;
         fireRenderer.enabled = false;

@@ -45,7 +45,5 @@ public class PlayerFire : NetworkBehaviour
         // 3) Now spawn the object and give ownership to the shooter
         var netObj = obj.GetComponent<NetworkObject>();
         netObj.SpawnWithOwnership(shooterId);
-    
-        Debug.Log($"Fireball spawned. Owner: {shooterId}");
     }
 }
