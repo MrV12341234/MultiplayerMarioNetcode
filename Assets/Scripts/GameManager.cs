@@ -95,7 +95,6 @@ public class GameManager : NetworkBehaviour
     }
     else
     {
-      // TODO: add check for isDead before resetting level. if showQuiz is not checked, ShowQuiz() is called from TriviaActivator on some objects
       ResetLevel();
     }
   }
@@ -146,12 +145,10 @@ public class GameManager : NetworkBehaviour
     
     if (lives > 0)
     {
-      
-      // TODO: I need to add coding here to have the player go back to checkpoint, not the start of the game. try using Y coordinate location
+      // TODO: maybe add coding here to have the player go back to checkpoint, not the start of the game. try using Y coordinate location
       
         NetworkGameManager.Instance.NotifyDeathServerRpc(); // tells the server you died – it will take care of the rest
-        
-    }
+        }
     else
     {
       GameOver();

@@ -65,6 +65,7 @@ public class NetworkManagerUI : MonoBehaviour
         if (!ValidateGamertag()) return;
         
         PlayerPrefs.SetString("Gamertag", gamertagInput.text.Trim());
+        
         NetworkManager.Singleton.NetworkConfig.ConnectionData =
             System.Text.Encoding.UTF8.GetBytes(gamertagInput.text.Trim());
                 

@@ -276,7 +276,7 @@ MonoBehaviour:
   gravityScale: 1
   jumpInterval: 4
   hitsToKill: 5
-  timeBetweenFlames: 5
+  timeBetweenFlames: 8
   flameSpawnPoint: {fileID: 3001721823194115561}
   flamePrefab: {fileID: 7673189346544150285, guid: 716c2825ccbc6cb4dbc3ea264f9b0d09, type: 3}
   groundCheck: {fileID: 5759729177463335111}

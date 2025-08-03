@@ -49,30 +49,38 @@ public class Player : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
-        if (!IsOwner)          // i.e. every “remote” copy
-            SetLayerRecursively(gameObject, RemotePlayerLayer);
+        // Subscribe FIRST, so any value change that happens right away
+        //    (which is the case for the host) will still raise the event.
+        PlayerName.OnValueChanged += OnNameChanged;
         
-        if (!IsOwner)
+        // draw whatever value exists right now***
+        if (!PlayerName.Value.IsEmpty)
+            GetComponentInChildren<NameTagUI>()?.Refresh(PlayerName.Value.ToString());
+
+        // Per-player layer & movement setup (unchanged)
+        if (!IsOwner)          // every “remote” copy
         {
+            SetLayerRecursively(gameObject, RemotePlayerLayer);
             GetComponent<PlayerMovement>().enabled = false;
-        }else                      // this is the local player
+        }
+        else                   // this is the local player (host OR client-owner)
         {
-            // Tell GameManager.cs which PlayerMovement belongs to us
             GameManager.Instance.RegisterLocalMover(GetComponent<PlayerMovement>());
         }
-        // When the owner spawns they tell the server their name
-        if (IsOwner && IsClient)
-        {
-            var localName =
-                PlayerPrefs.GetString("Gamertag", "Player").Trim(); 
-            if (localName.Length == 0) localName = "Player";
-            SubmitNameServerRpc(localName);
-        }
 
-        // Hook the change event so everyone updates the visible tag
-        PlayerName.OnValueChanged += OnNameChanged;
+        // Send our name to the server (runs instantly on the host)
+        if (IsOwner) // host or owner-client
+        {
+            string localName = PlayerPrefs.GetString("Gamertag", "Player").Trim();
+            if (string.IsNullOrEmpty(localName)) localName = "Player";
+
+            SubmitNameServerRpc(localName);
+
+            // ④  Host needs an immediate refresh in case OnValueChanged fired
+            //     before the NameTagUI subscribed—or in case the event is skipped.
+            GetComponentInChildren<NameTagUI>()?.Refresh(localName);
+        }
     }
-    
     [ServerRpc]
     private void SubmitNameServerRpc(string newName, ServerRpcParams rpc = default)
     {
@@ -157,6 +165,7 @@ public class Player : NetworkBehaviour
         firepower = false;
         deathAnimation.enabled = false;
         smallRenderer.enabled = true;  // whatever your size logic is
+        activeRenderer.spriteRenderer.color = Color.white; // added due to bug of player spawning with random color if they previously had starpower
     }
     
     public void Grow()

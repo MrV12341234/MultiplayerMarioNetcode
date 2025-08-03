@@ -7,7 +7,6 @@ using UnityEngine;
 public class NameTagUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI nameText;
-    [SerializeField] private float verticalOffset = 1.5f; // Height above player
     private Vector3 worldPositionOffset;
     
     private Vector3 _originalScale;
