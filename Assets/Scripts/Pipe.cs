@@ -1,17 +1,19 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Pipe : MonoBehaviour
 {
     public Transform connection; // reference another transform (location) in our world for mario to transport to
-    public KeyCode enterKeyCode = KeyCode.S;
+    public KeyCode enterKeyCode1 = KeyCode.S; // change in inspector for undergorund pipes that need "D" or Right arrow
+    public KeyCode enterKeyCode2 = KeyCode.DownArrow; // change in inspector for undergorund pipes that need "D" or Right arrow (when player is moving to the right)
     public Vector3 enterDirection = Vector3.down;
     public Vector3 exitDirection = Vector3.zero;
     private void OnTriggerStay2D(Collider2D other)
     {
         if (connection != null && other.CompareTag("Player"))
         {
-            if (Input.GetKey(enterKeyCode))
+            if (Input.GetKey(enterKeyCode1) || Input.GetKey(enterKeyCode2))
             {
                 StartCoroutine(Enter(other.transform)); // other is mario, transform is his position
             }

@@ -3341,7 +3341,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &106808523
 RectTransform:
   m_ObjectHideFlags: 0
@@ -60600,6 +60600,14 @@ PrefabInstance:
       propertyPath: connection
       value: 
       objectReference: {fileID: 1285978819}
+    - target: {fileID: -2482129873701385325, guid: f18efc45ebc91ca40bcd89159cf35f84, type: 3}
+      propertyPath: enterKeyCode1
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: -2482129873701385325, guid: f18efc45ebc91ca40bcd89159cf35f84, type: 3}
+      propertyPath: enterKeycode2
+      value: 275
+      objectReference: {fileID: 0}
     - target: {fileID: 2355043037470147678, guid: f18efc45ebc91ca40bcd89159cf35f84, type: 3}
       propertyPath: m_RootOrder
       value: 2
@@ -62387,6 +62395,38 @@ PrefabInstance:
       propertyPath: connection
       value: 
       objectReference: {fileID: 1655158057}
+    - target: {fileID: -2482129873701385325, guid: f18efc45ebc91ca40bcd89159cf35f84, type: 3}
+      propertyPath: enterKeyCode1
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: -2482129873701385325, guid: f18efc45ebc91ca40bcd89159cf35f84, type: 3}
+      propertyPath: enterKeyCodeS
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: -2482129873701385325, guid: f18efc45ebc91ca40bcd89159cf35f84, type: 3}
+      propertyPath: enterKeycode2
+      value: 275
+      objectReference: {fileID: 0}
+    - target: {fileID: -2482129873701385325, guid: f18efc45ebc91ca40bcd89159cf35f84, type: 3}
+      propertyPath: enterKeycodeDownArrow
+      value: 275
+      objectReference: {fileID: 0}
+    - target: {fileID: 1745061867167431458, guid: f18efc45ebc91ca40bcd89159cf35f84, type: 3}
+      propertyPath: m_Size.x
+      value: 1.1882782
+      objectReference: {fileID: 0}
+    - target: {fileID: 1745061867167431458, guid: f18efc45ebc91ca40bcd89159cf35f84, type: 3}
+      propertyPath: m_Size.y
+      value: 1.964407
+      objectReference: {fileID: 0}
+    - target: {fileID: 1745061867167431458, guid: f18efc45ebc91ca40bcd89159cf35f84, type: 3}
+      propertyPath: m_Offset.x
+      value: -0.0941391
+      objectReference: {fileID: 0}
+    - target: {fileID: 1745061867167431458, guid: f18efc45ebc91ca40bcd89159cf35f84, type: 3}
+      propertyPath: m_Offset.y
+      value: -0.0062761307
+      objectReference: {fileID: 0}
     - target: {fileID: 2355043037470147678, guid: f18efc45ebc91ca40bcd89159cf35f84, type: 3}
       propertyPath: m_RootOrder
       value: 2
